@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.ethan</groupId>
+    <artifactId>janus-spring-boot-starter</artifactId>
+    <version>2.7.0</version>
+    <name>janus-spring-boot-starter</name>
+    <description>Spring Boot Starter for Janus.</description>
+    <properties>
+        <java.version>8</java.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <!-- Janus 核心框架版本 -->
+        <janus.version>2.7.0</janus.version>
+    </properties>
+    <dependencies>
+        <!-- Janus 核心框架 -->
+        <dependency>
+            <groupId>com.ethan</groupId>
+            <artifactId>janus-core</artifactId>
+            <version>${janus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- 生成 IDE 提示文件 -->
+        <!-- application.yml 里会弹出属性补全和文档描述 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <!-- 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <!-- 指定 Java 版本 -->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <!-- 指定字符集 -->
+                    <encoding>UTF-8</encoding>
+                    <!-- 这对 Starter 极其重要！它会在编译时保留方法参数的真实名称（而不是变成 arg0, arg1） -->
+                    <!-- 场景：Spring 的依赖注入有时会根据参数名来匹配 Bean。如果不加这个，用户在使用你的 Starter 时，可能会遇到“无法通过参数名解析依赖”的诡异 Bug。 -->
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
