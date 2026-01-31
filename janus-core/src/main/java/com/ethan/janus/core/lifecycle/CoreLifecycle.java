@@ -36,7 +36,7 @@ public class CoreLifecycle implements JanusLifecycle {
 
     private final Map<Class<?>, Object> secondaryBeanCache = new ConcurrentHashMap<>();
     private final Map<Method, Method> secondaryMethodCache = new ConcurrentHashMap<>();
-    private Field methodInvocation = null;
+    private volatile Field methodInvocation = null; // volatile 防止代码重排序
 
     /**
      * 分流
