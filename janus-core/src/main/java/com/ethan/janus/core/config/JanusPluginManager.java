@@ -1,7 +1,7 @@
 package com.ethan.janus.core.config;
 
 import com.ethan.janus.core.exception.JanusException;
-import com.ethan.janus.core.plugin.JanusPlugin;
+import com.ethan.janus.core.lifecycle.JanusPlugin;
 import com.ethan.janus.core.utils.JanusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class PluginManager implements ApplicationRunner {
+public class JanusPluginManager implements ApplicationRunner {
 
     @Autowired
     private ApplicationContext applicationContext;

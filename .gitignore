@@ -37,6 +37,7 @@ bin/
 
 # Java & Maven (Build System)
 *.class
+.flattened-pom.xml
 
 # Log files
 *.log

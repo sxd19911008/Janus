@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 父项目基础坐标：统一管理子模块版本与依赖策略 -->
+    <groupId>com.ethan</groupId>
+    <artifactId>janus-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <!-- 父项目元信息：便于仓库与文档识别 -->
+    <name>janus-parent</name>
+    <description>Parent pom for Janus Framework.</description>
+
+    <!-- 统一属性：集中管理 Java 与依赖版本 -->
+    <properties>
+        <revision>2.7.0</revision>
+        <java.version>8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- Spring Boot 依赖版本：统一管理 -->
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <!-- Janus 核心版本：Starter 引用时使用 -->
+        <janus.version>${project.version}</janus.version>
+        <!-- 编译器插件版本：集中维护 -->
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    </properties>
+
+    <!-- 模块声明：将 core 与 starter 纳入同一父项目 -->
+    <modules>
+        <module>janus-core</module>
+        <module>janus-spring-boot-starter</module>
+    </modules>
+
+    <!-- 统一依赖版本管理：子模块可省略版本号 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot 依赖平台：统一第三方依赖版本 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Janus 核心模块版本：供 starter 或其他模块引用 -->
+            <dependency>
+                <groupId>com.ethan</groupId>
+                <artifactId>janus-core</artifactId>
+                <version>${janus.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- 统一插件管理：子模块可继承并按需覆盖 -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- 编译器插件：统一 Java 版本与编码 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <!-- 指定 Java 版本 -->
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <!-- 指定字符集 -->
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <!-- 保留参数名：提升 Spring 依赖注入与反射使用的可读性 -->
+                        <!-- 这对 Starter 极其重要！它会在编译时保留方法参数的真实名称（而不是变成 arg0, arg1） -->
+                        <!-- 场景：Spring 的依赖注入有时会根据参数名来匹配 Bean。如果不加这个，用户在使用你的 Starter 时，可能会遇到“无法通过参数名解析依赖”的诡异 Bug。 -->
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <!-- Flatten Plugin: 用于在 install/deploy 时将 ${revision} 替换为实际版本号 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.2.7</version>
+                <configuration>
+                    <!-- 是否生成临时文件：是 -->
+                    <updatePomFile>true</updatePomFile>
+                    <!-- 是否只替换版本变量：是 -->
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <!-- 插件生效时间：maven生命周期-编译前 -->
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <!-- 执行clean时，清理临时文件 -->
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

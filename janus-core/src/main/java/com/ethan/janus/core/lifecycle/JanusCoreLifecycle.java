@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Janus 框架核心功能生命周期。包含框架中的所有核心功能。
  */
 @Component
-public class CoreLifecycle implements JanusLifecycle {
+public class JanusCoreLifecycle implements JanusLifecycle {
 
     @Autowired
     private ApplicationContext applicationContext;

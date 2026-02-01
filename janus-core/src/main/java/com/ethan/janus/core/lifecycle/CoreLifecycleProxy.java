@@ -1,6 +1,5 @@
 package com.ethan.janus.core.lifecycle;
 
-import com.ethan.janus.core.plugin.JanusPlugin;
 import com.ethan.janus.core.utils.JanusUtils;
 
 import java.util.List;
@@ -22,27 +21,27 @@ public class CoreLifecycleProxy implements JanusLifecycle{
     }
 
     @Override
-    public void switchBranch(JanusContext<?> context) {
+    public void switchBranch(JanusContext context) {
         this.executePluginList(plugin -> plugin.switchBranch(context));
         target.switchBranch(context);
     }
 
     @Override
-    public void primaryExecute(JanusContext<?> context) {
+    public void primaryExecute(JanusContext context) {
         this.executePluginList(plugin -> plugin.beforePrimaryExecute(context));
         target.primaryExecute(context);
         this.executePluginList(plugin -> plugin.afterPrimaryExecute(context));
     }
 
     @Override
-    public void secondaryExecute(JanusContext<?> context) {
+    public void secondaryExecute(JanusContext context) {
         this.executePluginList(plugin -> plugin.beforeSecondaryExecute(context));
         target.secondaryExecute(context);
         this.executePluginList(plugin -> plugin.afterSecondaryExecute(context));
     }
 
     @Override
-    public void compare(JanusContext<?> context) {
+    public void compare(JanusContext context) {
         this.executePluginList(plugin -> plugin.beforeCompare(context));
         target.compare(context);
         this.executePluginList(plugin -> plugin.afterCompare(context));

@@ -14,7 +14,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JanusContext<T> {
+public class JanusContext {
 
     // 切点对象
     private ProceedingJoinPoint joinPoint;
@@ -49,9 +49,7 @@ public class JanusContext<T> {
     private Map<String, String> compareResMap;
 
     // 自定义数据
-    @Setter
-    @Getter
-    private T customData;
+    private Map<Class<?>, Object> pluginDataMap;
 
     protected ProceedingJoinPoint getJoinPoint() {
         return joinPoint;
@@ -84,5 +82,13 @@ public class JanusContext<T> {
 
     protected JanusLifecycle getLifecycle() {
         return this.lifecycle;
+    }
+
+    protected Object getPluginData(Class<?> clazz) {
+        return this.pluginDataMap.get(clazz);
+    }
+
+    protected void putPluginData(Class<?> clazz, Object data) {
+        this.pluginDataMap.put(clazz, data);
     }
 }

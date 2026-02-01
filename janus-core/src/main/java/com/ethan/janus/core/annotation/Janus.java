@@ -1,6 +1,6 @@
 package com.ethan.janus.core.annotation;
 
-import com.ethan.janus.core.plugin.JanusPlugin;
+import com.ethan.janus.core.lifecycle.JanusPlugin;
 import com.ethan.janus.core.constants.CompareType;
 
 import java.lang.annotation.*;

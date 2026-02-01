@@ -2,18 +2,18 @@ package com.ethan.janus.core.lifecycle;
 
 import com.ethan.janus.core.annotation.Janus;
 import com.ethan.janus.core.config.JanusConfig;
-import com.ethan.janus.core.config.PluginManager;
+import com.ethan.janus.core.config.JanusPluginManager;
 import com.ethan.janus.core.constants.CompareType;
 import com.ethan.janus.core.constants.JanusConstants;
 import com.ethan.janus.core.dto.BranchInfo;
 import com.ethan.janus.core.exception.JanusException;
-import com.ethan.janus.core.plugin.JanusPlugin;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -22,9 +22,9 @@ import java.util.concurrent.ExecutorService;
 public class JanusAspect {
 
     @Autowired
-    private CoreLifecycle coreLifecycle;
+    private JanusCoreLifecycle janusCoreLifecycle;
     @Autowired
-    private PluginManager pluginManager;
+    private JanusPluginManager janusPluginManager;
     @Autowired
     private ExecutorService janusThreadPool;
     @Autowired
@@ -47,7 +47,7 @@ public class JanusAspect {
 
         /* 插件 */
         List<JanusPlugin> pluginList = this.getPluginList(janus);
-        CoreLifecycleProxy lifecycle = new CoreLifecycleProxy(coreLifecycle, pluginList);
+        CoreLifecycleProxy lifecycle = new CoreLifecycleProxy(janusCoreLifecycle, pluginList);
 
         /* 创建上下文对象（循环依赖结构） */
         JanusContext context = JanusContext.builder()
@@ -55,6 +55,7 @@ public class JanusAspect {
                 .lifecycle(lifecycle)
                 .primaryBranch(primaryBranch)
                 .secondaryBranch(secondaryBranch)
+                .pluginDataMap(new HashMap<>())
                 .build();
 
         /* 设置比对类型 */
@@ -161,6 +162,6 @@ public class JanusAspect {
         // 查询插件 class 类型
         Class<? extends JanusPlugin>[] pluginClassArr = janus.plugins();
         // 查询插件单例对象
-        return pluginManager.getJanusPluginList(pluginClassArr);
+        return janusPluginManager.getJanusPluginList(pluginClassArr);
     }
 }
