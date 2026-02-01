@@ -1,5 +1,7 @@
 package com.ethan.janus.core.lifecycle;
 
+import com.ethan.janus.core.exception.JanusException;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -48,8 +50,8 @@ public class AbstractDataJanusPlugin<T> implements JanusPlugin {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            throw new JanusException("请设置插件数据实体类的泛型");
         }
-
-        return null;
     }
 }
