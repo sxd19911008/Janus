@@ -51,11 +51,11 @@ public class JanusContext {
     // 自定义数据
     private Map<Class<?>, Object> pluginDataMap;
 
-    protected ProceedingJoinPoint getJoinPoint() {
+    ProceedingJoinPoint getJoinPoint() {
         return joinPoint;
     }
 
-    protected void setCompareType(CompareType compareType) {
+    void setCompareType(CompareType compareType) {
         this.compareType = compareType;
     }
 
@@ -68,27 +68,27 @@ public class JanusContext {
         }
     }
 
-    protected void setMasterBranch(BranchInfo masterBranch) {
+    void setMasterBranch(BranchInfo masterBranch) {
         this.masterBranch = masterBranch;
     }
 
-    protected void setCompareBranch(BranchInfo compareBranch) {
+    void setCompareBranch(BranchInfo compareBranch) {
         this.compareBranch = compareBranch;
     }
 
-    protected void setCompareResMap(Map<String, String> compareResMap) {
+    void setCompareResMap(Map<String, String> compareResMap) {
         this.compareResMap = compareResMap;
     }
 
-    protected JanusLifecycle getLifecycle() {
+    JanusLifecycle getLifecycle() {
         return this.lifecycle;
     }
 
-    protected Object getPluginData(Class<?> clazz) {
+    Object getPluginData(Class<?> clazz) {
         return this.pluginDataMap.get(clazz);
     }
 
-    protected void putPluginData(Class<?> clazz, Object data) {
+    void putPluginData(Class<?> clazz, Object data) {
         this.pluginDataMap.put(clazz, data);
     }
 }

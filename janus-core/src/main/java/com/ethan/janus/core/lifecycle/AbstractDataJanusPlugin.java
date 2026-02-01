@@ -13,7 +13,7 @@ public class AbstractDataJanusPlugin<T> implements JanusPlugin {
     // 插件数据实体类的 class
     private final Class<T> janusPluginDataClass;
 
-    public AbstractDataJanusPlugin() {
+    protected AbstractDataJanusPlugin() {
         thisClass = this.getClass();
         // 获取当前实现类的 Class（在运行时，this 指向的是实现类的实例）
         Type type = thisClass.getGenericSuperclass();
