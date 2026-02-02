@@ -3,7 +3,7 @@ package com.ethan.janus.core.lifecycle;
 /**
  * Janus 生命周期接口
  */
-public interface JanusLifecycle {
+public interface Lifecycle {
 
     void switchBranch(JanusContext context);
 

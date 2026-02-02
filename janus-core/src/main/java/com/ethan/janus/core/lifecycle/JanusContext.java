@@ -21,7 +21,7 @@ public class JanusContext {
     private ProceedingJoinPoint joinPoint;
 
     // 生命周期实现
-    private JanusLifecycle lifecycle;
+    private Lifecycle lifecycle;
 
     // 插件
     private List<JanusPlugin> pluginList;
@@ -59,7 +59,7 @@ public class JanusContext {
         return joinPoint;
     }
 
-    JanusLifecycle getLifecycle() {
+    Lifecycle getLifecycle() {
         return this.lifecycle;
     }
 

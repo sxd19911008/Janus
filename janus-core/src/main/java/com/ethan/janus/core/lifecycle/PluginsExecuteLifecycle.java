@@ -1,47 +1,44 @@
 package com.ethan.janus.core.lifecycle;
 
 import com.ethan.janus.core.utils.JanusUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * 核心生命周期静态代理类。
- * <P>1. 每次进入aop都要new一个新的代理类，以此来更新pluginList
- * <P>2. 作为代理类，增强的功能为：在正确的生命周期节点执行配置的插件。
+ * 核心生命周期静态装饰类。
+ * <P>作为装饰类，增强的功能为：在正确的生命周期节点执行配置的插件。
  */
-@Component
-public class JanusCoreLifecycleProxy implements JanusLifecycle{
+public class PluginsExecuteLifecycle extends LifecycleDecorator {
 
-    @Autowired
-    private JanusLifecycle janusCoreLifecycle;
+    public PluginsExecuteLifecycle(Lifecycle decoratedLifecycle) {
+        super(decoratedLifecycle);
+    }
 
     @Override
     public void switchBranch(JanusContext context) {
         this.executePluginList(context, plugin -> plugin.switchBranch(context));
-        janusCoreLifecycle.switchBranch(context);
+        decoratedLifecycle.switchBranch(context);
     }
 
     @Override
     public void primaryExecute(JanusContext context) {
         this.executePluginList(context, plugin -> plugin.beforePrimaryExecute(context));
-        janusCoreLifecycle.primaryExecute(context);
+        decoratedLifecycle.primaryExecute(context);
         this.executePluginList(context, plugin -> plugin.afterPrimaryExecute(context));
     }
 
     @Override
     public void secondaryExecute(JanusContext context) {
         this.executePluginList(context, plugin -> plugin.beforeSecondaryExecute(context));
-        janusCoreLifecycle.secondaryExecute(context);
+        decoratedLifecycle.secondaryExecute(context);
         this.executePluginList(context, plugin -> plugin.afterSecondaryExecute(context));
     }
 
     @Override
     public void compare(JanusContext context) {
         this.executePluginList(context, plugin -> plugin.beforeCompare(context));
-        janusCoreLifecycle.compare(context);
+        decoratedLifecycle.compare(context);
         this.executePluginList(context, plugin -> plugin.afterCompare(context));
     }
 
