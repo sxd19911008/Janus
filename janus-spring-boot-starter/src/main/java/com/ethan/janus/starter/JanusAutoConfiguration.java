@@ -4,8 +4,6 @@ import com.ethan.janus.core.aspect.JanusAspect;
 import com.ethan.janus.core.config.JanusConfigProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,11 +16,4 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(JanusConfigProperties.class) // 启用 Janus 配置属性绑定
 public class JanusAutoConfiguration {
 
-    /**
-     * 校验 @Janus 注解中的 methodId 是否重复
-     */
-    @Bean
-    public JanusMethodIdDuplicateChecker duplicateKeyChecker(ApplicationContext applicationContext, JanusConfigProperties janusConfigProperties) {
-        return new JanusMethodIdDuplicateChecker(applicationContext, janusConfigProperties);
-    }
 }

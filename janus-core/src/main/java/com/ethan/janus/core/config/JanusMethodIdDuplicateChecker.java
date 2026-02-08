@@ -1,12 +1,13 @@
-package com.ethan.janus.starter;
+package com.ethan.janus.core.config;
 
 import com.ethan.janus.core.annotation.Janus;
-import com.ethan.janus.core.config.JanusConfigProperties;
 import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.utils.JanusAopUtils;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.HashSet;
@@ -15,15 +16,13 @@ import java.util.Set;
 /**
  * 校验 @Janus 注解中的 methodId 是否重复
  */
+@Component
 public class JanusMethodIdDuplicateChecker implements SmartInitializingSingleton {
 
-    private final ApplicationContext applicationContext;
-    private final JanusConfigProperties janusConfigProperties;
-
-    public JanusMethodIdDuplicateChecker(ApplicationContext applicationContext, JanusConfigProperties janusConfigProperties) {
-        this.applicationContext = applicationContext;
-        this.janusConfigProperties = janusConfigProperties;
-    }
+    @Autowired
+    private ApplicationContext applicationContext;
+    @Autowired
+    private JanusConfigProperties janusConfigProperties;
 
     @Override
     public void afterSingletonsInstantiated() {
