@@ -42,12 +42,22 @@ public class JanusTests {
     @Test
     public void janusTest() {
         TestResponse response1 = testInterface.testMethod(new TestRequest("1"));
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Assertions.assertEquals(1, response1.getNumber());
         Assertions.assertTrue(primaryTime > 0);
         Assertions.assertTrue(secondaryTime > 0);
         Assertions.assertEquals("{}", JsonUtils.writeValueAsString(compareResMap));
 
         TestResponse response2 = testInterface.testMethod(new TestRequest("2"));
+        try {
+            Thread.sleep(1000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         Assertions.assertEquals(2, response2.getNumber());
         Assertions.assertTrue(primaryTime > 0);
         Assertions.assertTrue(secondaryTime > 0);

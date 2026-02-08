@@ -40,6 +40,8 @@ public class JanusAspect {
     @Autowired
     private ExecutorService janusBranchThreadPool;
     @Autowired
+    private ExecutorService janusCompareThreadPool;
+    @Autowired
     private JanusConfigProperties janusConfigProperties;
 
     @Around("@annotation(janus)")
@@ -130,6 +132,8 @@ public class JanusAspect {
                 break;
             // 同步比对
             case SYNC_COMPARE:
+            case SYNC_ROLLBACK_ONE_COMPARE:
+            case SYNC_ROLLBACK_ALL_COMPARE:
                 this.compareTwoBranch(context);
                 break;
             // 不比对
@@ -149,7 +153,12 @@ public class JanusAspect {
         this.executedCompareBranch(context);
 
         /* 比对 */
-        context.getLifecycle().compare(context);
+        if (context.getIsAsyncCompare()) {
+            janusCompareThreadPool.execute(() -> context.getLifecycle().compare(context));
+        } else {
+            // 同步比对
+            context.getLifecycle().compare(context);
+        }
     }
 
     /**
