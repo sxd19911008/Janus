@@ -1,9 +1,12 @@
 package com.ethan.janus.core.lifecycle;
 
 import com.ethan.janus.core.annotation.Secondary;
-import com.ethan.janus.core.config.JanusConfig;
+import com.ethan.janus.core.config.JanusConfigProperties;
+import com.ethan.janus.core.constants.CompareType;
 import com.ethan.janus.core.constants.JanusConstants;
-import com.ethan.janus.core.dto.BranchInfo;
+import com.ethan.janus.core.dto.BranchInfoImpl;
+import com.ethan.janus.core.dto.JanusContext;
+import com.ethan.janus.core.dto.JanusContextImpl;
 import com.ethan.janus.core.dto.SecondaryMethodInfo;
 import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.utils.JanusUtils;
@@ -32,7 +35,7 @@ public class CoreLifecycle implements Lifecycle {
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
-    private JanusConfig janusConfig;
+    private JanusConfigProperties janusConfigProperties;
 
     private final Map<Class<?>, Object> secondaryBeanCache = new ConcurrentHashMap<>();
     private final Map<Method, Method> secondaryMethodCache = new ConcurrentHashMap<>();
@@ -42,11 +45,11 @@ public class CoreLifecycle implements Lifecycle {
      * 分流
      */
     @Override
-    public void switchBranch(JanusContext context) {
+    public void switchBranch(JanusContextImpl context) {
         // 分流
         if (JanusUtils.isBlank(context.getMasterBranchName())) {
             // 使用默认的分流方式
-            context.setMasterBranchName(janusConfig.getMasterBranch());
+            context.setMasterBranchName(janusConfigProperties.getMasterBranch());
         } else {
             // 校验
             if (!JanusConstants.PRIMARY.equals(context.getMasterBranchName())
@@ -62,10 +65,10 @@ public class CoreLifecycle implements Lifecycle {
      * 执行 primary 分支
      */
     @Override
-    public void primaryExecute(JanusContext context) {
-        BranchInfo branch = context.getPrimaryBranch();
+    public void primaryExecute(JanusContextImpl context) {
+        BranchInfoImpl branch = context.getPrimaryBranch();
         // 校验
-        if (branch.getIsExecuted() != null && branch.getIsExecuted()) {
+        if (branch.getIsExecuted()) {
             // 执行过了就不要再执行了。
             return;
         }
@@ -89,6 +92,8 @@ public class CoreLifecycle implements Lifecycle {
         } catch (Throwable e) {
             // 保存异常对象
             branch.setException(e);
+        } finally {
+            branch.setIsExecuted(true);
         }
     }
 
@@ -96,10 +101,10 @@ public class CoreLifecycle implements Lifecycle {
      * 执行 secondary 分支
      */
     @Override
-    public void secondaryExecute(JanusContext context) {
-        BranchInfo branch = context.getSecondaryBranch();
+    public void secondaryExecute(JanusContextImpl context) {
+        BranchInfoImpl branch = context.getSecondaryBranch();
         // 校验
-        if (branch.getIsExecuted() != null && branch.getIsExecuted()) {
+        if (branch.getIsExecuted()) {
             // 执行过了就不要再执行了。
             return;
         }
@@ -112,6 +117,8 @@ public class CoreLifecycle implements Lifecycle {
         } catch (Throwable e) {
             // 保存异常对象
             branch.setException(e);
+        } finally {
+            branch.setIsExecuted(true);
         }
     }
 
@@ -119,26 +126,52 @@ public class CoreLifecycle implements Lifecycle {
      * 执行 比对 功能
      */
     @Override
-    public void compare(JanusContext context) {
-        BranchInfo primaryBranch = context.getPrimaryBranch();
-        BranchInfo secondaryBranch = context.getSecondaryBranch();
-        Map<String, String> compareResMap = JsonUtils.compareObj(primaryBranch.getRes(), secondaryBranch.getRes());
-        context.setCompareResMap(compareResMap);
+    public void compare(JanusContextImpl context) {
+        try {
+            BranchInfoImpl primaryBranch = context.getPrimaryBranch();
+            BranchInfoImpl secondaryBranch = context.getSecondaryBranch();
+            Map<String, String> compareResMap = JsonUtils.compareObj(primaryBranch.getRes(), secondaryBranch.getRes());
+            context.setCompareResMap(compareResMap);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            // TODO 日志框架
+        }
     }
 
     /**
      * 设置主分支和比对分支
      */
     private void setMasterBranch(JanusContext context) {
-        String masterBranchName = context.getMasterBranchName();
+        JanusContextImpl contextImpl = (JanusContextImpl) context;
+        /* 设置 master、compare 分支 */
+        String masterBranchName = contextImpl.getMasterBranchName();
+        BranchInfoImpl masterBranch;
+        BranchInfoImpl compareBranch;
         if (JanusConstants.PRIMARY.equals(masterBranchName)) {
-            context.setMasterBranch(context.getPrimaryBranch());
-            context.setCompareBranch(context.getSecondaryBranch());
+            masterBranch = contextImpl.getPrimaryBranch();
+            compareBranch = contextImpl.getSecondaryBranch();
         } else if (JanusConstants.SECONDARY.equals(masterBranchName)) {
-            context.setMasterBranch(context.getSecondaryBranch());
-            context.setCompareBranch(context.getPrimaryBranch());
+            masterBranch = contextImpl.getSecondaryBranch();
+            compareBranch = contextImpl.getPrimaryBranch();
         } else {
             throw new JanusException("不支持的 masterBranch 类型: [" + masterBranchName + "]");
+        }
+        contextImpl.setMasterBranch(masterBranch);
+        contextImpl.setCompareBranch(compareBranch);
+
+        /* master 分支 */
+        // 如果需要回滚，则设置相关标识
+        if (CompareType.isMasterBranchRollback(context.getCompareType())) {
+            masterBranch.setIsRollback(true);
+        }
+        /* compare 分支 */
+        // 如果需要回滚，则设置相关标识
+        if (CompareType.isCompareBranchRollback(context.getCompareType())) {
+            compareBranch.setIsRollback(true);
+        }
+        // 如果是异步执行，需要设置相关标识
+        if (context.getCompareType() == CompareType.ASYNC_COMPARE) {
+            compareBranch.setIsAsync(true);
         }
     }
 

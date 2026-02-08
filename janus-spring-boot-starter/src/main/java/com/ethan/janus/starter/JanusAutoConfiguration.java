@@ -1,7 +1,7 @@
 package com.ethan.janus.starter;
 
-import com.ethan.janus.core.lifecycle.JanusAspect;
-import com.ethan.janus.core.config.JanusConfig;
+import com.ethan.janus.core.aspect.JanusAspect;
+import com.ethan.janus.core.config.JanusConfigProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnClass(JanusAspect.class)
 @ComponentScan(basePackages = "com.ethan.janus") // 扫描 Janus 核心包，自动注册组件
-@EnableConfigurationProperties(JanusConfig.class) // 启用 Janus 配置属性绑定
+@EnableConfigurationProperties(JanusConfigProperties.class) // 启用 Janus 配置属性绑定
 public class JanusAutoConfiguration {
     // 该类仅用于触发自动装配，不需要额外代码实现。
     // 保留此空类结构是为了让 Spring Boot 自动装配机制可识别入口。

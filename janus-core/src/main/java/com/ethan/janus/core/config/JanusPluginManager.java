@@ -1,7 +1,8 @@
 package com.ethan.janus.core.config;
 
 import com.ethan.janus.core.exception.JanusException;
-import com.ethan.janus.core.lifecycle.JanusPlugin;
+import com.ethan.janus.core.plugin.JanusPlugin;
+import com.ethan.janus.core.utils.JanusAopUtils;
 import com.ethan.janus.core.utils.JanusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -27,12 +28,18 @@ public class JanusPluginManager implements ApplicationRunner {
         Map<String, JanusPlugin> beanMap = applicationContext.getBeansOfType(JanusPlugin.class);
         if (JanusUtils.isNotEmpty(beanMap)) {
             for (JanusPlugin plugin : beanMap.values()) {
+                // 防止有动态代理类导致无法获取正确的class，先获取原始的bean对象
+                JanusPlugin target = (JanusPlugin) JanusAopUtils.getProxyTarget(plugin);
                 // 插件类型
-                Class<? extends JanusPlugin> clazz = plugin.getClass();
+                Class<? extends JanusPlugin> clazz = target.getClass();
                 // 同一个插件有多个对象，会报错
                 JanusPlugin pluginFromMap = this.pluginMap.get(clazz);
                 if (pluginFromMap != null) {
                     throw new JanusException("Multiple plugins of type [" + clazz.getName() + "] found");
+                }
+                // 插件优先级是否合法
+                if (plugin.getOrder() == 0) {
+                    throw new JanusException("插件优先级不能为0");
                 }
                 // 保存插件
                 this.pluginMap.put(clazz, plugin);
@@ -61,7 +68,7 @@ public class JanusPluginManager implements ApplicationRunner {
      */
     public List<JanusPlugin> getJanusPluginList(Class<? extends JanusPlugin>[] clazzArr) {
         if (clazzArr == null || clazzArr.length == 0) {
-            return null;
+            return new ArrayList<>();
         }
         List<JanusPlugin> list = new ArrayList<>();
         for (Class<? extends JanusPlugin> aClass : clazzArr) {

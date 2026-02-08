@@ -1,15 +1,17 @@
 package com.ethan.janus.core.lifecycle;
 
+import com.ethan.janus.core.dto.JanusContextImpl;
+
 /**
  * Janus 生命周期接口
  */
 public interface Lifecycle {
 
-    void switchBranch(JanusContext context);
+    void switchBranch(JanusContextImpl context);
 
-    void primaryExecute(JanusContext context);
+    void primaryExecute(JanusContextImpl context);
 
-    void secondaryExecute(JanusContext context);
+    void secondaryExecute(JanusContextImpl context);
 
-    void compare(JanusContext context);
+    void compare(JanusContextImpl context);
 }

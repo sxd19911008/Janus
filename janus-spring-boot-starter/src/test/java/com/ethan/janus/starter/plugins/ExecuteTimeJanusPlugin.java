@@ -1,7 +1,7 @@
 package com.ethan.janus.starter.plugins;
 
-import com.ethan.janus.core.lifecycle.AbstractDataJanusPlugin;
-import com.ethan.janus.core.lifecycle.JanusContext;
+import com.ethan.janus.core.dto.JanusContext;
+import com.ethan.janus.core.plugin.AbstractDataJanusPlugin;
 import com.ethan.janus.starter.JanusTests;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;

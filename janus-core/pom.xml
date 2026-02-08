@@ -26,6 +26,12 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
+        <!-- 为了操作数据库事务 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
         <!-- 自动装配与配置属性支持：@ConfigurationProperties 等 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,6 @@
 package com.ethan.janus.core.annotation;
 
-import com.ethan.janus.core.lifecycle.JanusPlugin;
+import com.ethan.janus.core.plugin.JanusPlugin;
 import com.ethan.janus.core.constants.CompareType;
 
 import java.lang.annotation.*;
@@ -14,4 +14,13 @@ public @interface Janus {
     CompareType compareType() default CompareType.NONE;
 
     Class<? extends JanusPlugin>[] plugins() default {};
+
+    /*
+     * 比对功能是否异步执行。
+     * 可配置项：
+     *      1.true: 异步执行比对功能
+     *      2.false: 主线程同步执行比对功能
+     * 不配置该项时，默认为 true，表示异步执行比对功能。
+     */
+    boolean isAsyncCompare() default true;
 }

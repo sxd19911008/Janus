@@ -1,5 +1,7 @@
-package com.ethan.janus.core.lifecycle;
+package com.ethan.janus.core.plugin;
 
+import com.ethan.janus.core.dto.JanusContext;
+import com.ethan.janus.core.dto.JanusContextImpl;
 import com.ethan.janus.core.exception.JanusException;
 
 import java.lang.reflect.ParameterizedType;
@@ -37,7 +39,8 @@ public class AbstractDataJanusPlugin<T> implements JanusPlugin {
      * @return 插件数据对象
      */
     protected final T getPluginData(JanusContext context) {
-        Object pluginDataObj = context.getPluginData(thisClass);
+        JanusContextImpl janusContextImpl = (JanusContextImpl) context;
+        Object pluginDataObj = janusContextImpl.getPluginData(thisClass);
         if (pluginDataObj != null) {
             //noinspection unchecked
             return (T) pluginDataObj;
@@ -45,7 +48,7 @@ public class AbstractDataJanusPlugin<T> implements JanusPlugin {
         if (this.janusPluginDataClass != null) {
             try {
                 T pluginData = janusPluginDataClass.getDeclaredConstructor().newInstance();
-                context.putPluginData(thisClass, pluginData);
+                janusContextImpl.putPluginData(thisClass, pluginData);
                 return pluginData;
             } catch (Throwable e) {
                 throw new RuntimeException(e);

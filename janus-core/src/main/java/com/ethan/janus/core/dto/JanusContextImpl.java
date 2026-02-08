@@ -1,8 +1,9 @@
-package com.ethan.janus.core.lifecycle;
+package com.ethan.janus.core.dto;
 
 import com.ethan.janus.core.constants.CompareType;
-import com.ethan.janus.core.dto.BranchInfo;
 import com.ethan.janus.core.exception.JanusException;
+import com.ethan.janus.core.plugin.JanusPlugin;
+import com.ethan.janus.core.lifecycle.Lifecycle;
 import lombok.*;
 import org.aspectj.lang.ProceedingJoinPoint;
 
@@ -15,7 +16,8 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class JanusContext {
+@Getter
+public class JanusContextImpl implements JanusContext {
 
     // 切点对象
     private ProceedingJoinPoint joinPoint;
@@ -23,53 +25,39 @@ public class JanusContext {
     // 生命周期实现
     private Lifecycle lifecycle;
 
-    // 插件
-    private List<JanusPlugin> pluginList;
+    // 优先级小于0的插件
+    private List<JanusPlugin> higherPluginList;
+
+    // 优先级大于0的插件
+    private List<JanusPlugin> lowerPluginList;
 
     // 比对类型
-    @Getter
+    @Setter
     private CompareType compareType;
 
+    private Boolean isAsyncCompare;
+
     // 主分支，只允许设置1次，不能随意修改该属性
-    @Getter
     private String masterBranchName;
 
     // 加了 Janus 注解的分支
-    @Getter
-    private BranchInfo primaryBranch;
+    private BranchInfoImpl primaryBranch;
     // 次要分支
-    @Getter
-    private BranchInfo secondaryBranch;
+    private BranchInfoImpl secondaryBranch;
 
     // 主分支
-    @Getter
-    private BranchInfo masterBranch;
+    @Setter
+    private BranchInfoImpl masterBranch;
     // 用于比对的分支
-    @Getter
-    private BranchInfo compareBranch;
+    @Setter
+    private BranchInfoImpl compareBranch;
 
     // 比对结果
-    @Getter
+    @Setter
     private Map<String, String> compareResMap;
 
     // 自定义数据
     private Map<Class<?>, Object> pluginDataMap;
-
-    ProceedingJoinPoint getJoinPoint() {
-        return joinPoint;
-    }
-
-    Lifecycle getLifecycle() {
-        return this.lifecycle;
-    }
-
-    List<JanusPlugin> getPluginList() {
-        return pluginList;
-    }
-
-    void setCompareType(CompareType compareType) {
-        this.compareType = compareType;
-    }
 
     public void setMasterBranchName(String masterBranchName) {
         // 只允许设置1次，不能随意修改该属性
@@ -80,23 +68,11 @@ public class JanusContext {
         }
     }
 
-    void setMasterBranch(BranchInfo masterBranch) {
-        this.masterBranch = masterBranch;
-    }
-
-    void setCompareBranch(BranchInfo compareBranch) {
-        this.compareBranch = compareBranch;
-    }
-
-    void setCompareResMap(Map<String, String> compareResMap) {
-        this.compareResMap = compareResMap;
-    }
-
-    Object getPluginData(Class<?> clazz) {
+    public Object getPluginData(Class<?> clazz) {
         return this.pluginDataMap.get(clazz);
     }
 
-    void putPluginData(Class<?> clazz, Object data) {
+    public void putPluginData(Class<?> clazz, Object data) {
         this.pluginDataMap.put(clazz, data);
     }
 }
