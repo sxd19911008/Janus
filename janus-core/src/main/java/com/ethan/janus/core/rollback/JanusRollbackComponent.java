@@ -24,7 +24,6 @@ public class JanusRollbackComponent implements JanusRollback {
     @Autowired
     private JanusRollbackComponent thisBean;
 
-    @Transactional(rollbackFor = Throwable.class)
     public void branchRollback(Runnable runnable) {
         try {
             thisBean.transactional(runnable);
