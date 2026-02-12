@@ -1,22 +1,28 @@
 package com.ethan.janus.core.aspect;
 
 import com.ethan.janus.core.annotation.Janus;
+import com.ethan.janus.core.config.ExpressionRootObject;
 import com.ethan.janus.core.config.JanusConfigProperties;
+import com.ethan.janus.core.config.JanusExpressionEvaluator;
 import com.ethan.janus.core.config.JanusPluginManager;
 import com.ethan.janus.core.constants.CompareType;
 import com.ethan.janus.core.constants.JanusConstants;
 import com.ethan.janus.core.dto.BranchInfoImpl;
 import com.ethan.janus.core.dto.JanusContextImpl;
+import com.ethan.janus.core.dto.PluginListDTO;
 import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.lifecycle.LifecycleDecoratorManager;
 import com.ethan.janus.core.plugin.JanusPlugin;
+import com.ethan.janus.core.utils.JanusUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -43,6 +49,8 @@ public class JanusAspect {
     private ExecutorService janusCompareThreadPool;
     @Autowired
     private JanusConfigProperties janusConfigProperties;
+    @Autowired
+    private JanusExpressionEvaluator janusExpressionEvaluator;
 
     @Around("@annotation(janus)")
     public Object janusAspect(ProceedingJoinPoint joinPoint, Janus janus) throws Throwable {
@@ -64,29 +72,24 @@ public class JanusAspect {
                 .build();
 
         /* 插件 */
-        List<JanusPlugin> pluginList = this.getPluginList(janus);
-        // 插件排序，越小的越优先，放在前面
-        pluginList = pluginList.stream().sorted(Comparator.comparing(JanusPlugin::getOrder)).collect(Collectors.toList());
+        // 添加插件
+        PluginListDTO pluginListDTO = this.addPlugins(janus);
         // 高优先级插件，order 小于0
-        List<JanusPlugin> higherPluginList = new ArrayList<>();
+        List<JanusPlugin> higherPluginList = pluginListDTO.getHigherPluginList();
         // 低优先级插件，order 大于0
-        List<JanusPlugin> lowerPluginList = new ArrayList<>();
-        // 插件分类
-        for (JanusPlugin janusPlugin : pluginList) {
-            if (janusPlugin.getOrder() < 0) {
-                higherPluginList.add(janusPlugin);
-            } else {
-                lowerPluginList.add(janusPlugin);
-            }
-        }
+        List<JanusPlugin> lowerPluginList = pluginListDTO.getLowerPluginList();
 
-        /* 创建上下文对象（循环依赖结构） */
+        /* 业务数据键 */
+        String businessKey = this.getBusinessKey(janus, joinPoint);
+
+        /* 创建上下文对象 */
         JanusContextImpl context = JanusContextImpl.builder()
                 .joinPoint(joinPoint)
                 .lifecycle(lifecycleDecoratorManager)
                 .higherPluginList(higherPluginList)
                 .lowerPluginList(lowerPluginList)
                 .methodId(janus.methodId())
+                .businessKey(businessKey)
                 .isAsyncCompare(janus.isAsyncCompare())
                 .primaryBranch(primaryBranch)
                 .secondaryBranch(secondaryBranch)
@@ -108,7 +111,13 @@ public class JanusAspect {
 
         /* 比对 */
         // 处理比对流程
-        this.handleCompare(context);
+        try {
+            this.handleCompare(context);
+        } catch (Throwable e) {
+            // 比对流程报错不影响主分支
+            // TODO 日志框架
+            e.printStackTrace();
+        }
 
         /* 返回结果 */
         if (context.getMasterBranch().getException() != null) {
@@ -190,6 +199,67 @@ public class JanusAspect {
         } else {
             throw new JanusException("不支持的 MasterBranch 类型: [" + context.getMasterBranchName() + "]");
         }
+    }
+
+    /**
+     * 解析SpEL表达式，获取 业务数据键
+     */
+    private String getBusinessKey(Janus janus, ProceedingJoinPoint joinPoint) {
+        // SpEL 表达式
+        String businessKeySpEL = janus.businessKey();
+        // 表达式为空直接返回
+        if (JanusUtils.isBlank(businessKeySpEL)) {
+            return "";
+        }
+        // 切点方法对象
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        // 切点所在的原始 bean
+        Object target = joinPoint.getTarget();
+        Class<?> targetClass = target.getClass();
+        // 切点方法入参
+        Object[] args = joinPoint.getArgs();
+
+        // rootObject
+        ExpressionRootObject rootObject = ExpressionRootObject.builder()
+                .targetBean(target)
+                .build();
+
+        // 通过表达式获取 业务数据键
+        Object evaluate = janusExpressionEvaluator.evaluate(businessKeySpEL, method, targetClass, args, rootObject);
+        // 返回结果
+        if (evaluate == null) {
+            return "";
+        } else {
+            return String.valueOf(evaluate);
+        }
+    }
+
+    /**
+     * 添加 @Janus 中配置的插件
+     */
+    private PluginListDTO addPlugins(Janus janus) {
+        /* 获取所有 janus 配置的插件 */
+        List<JanusPlugin> pluginList = this.getPluginList(janus);
+        /* 插件分类 */
+        // 插件排序，越小的越优先，放在前面
+        pluginList = pluginList.stream().sorted(Comparator.comparing(JanusPlugin::getOrder)).collect(Collectors.toList());
+        // 高优先级插件，order 小于0
+        List<JanusPlugin> higherPluginList = new ArrayList<>();
+        // 低优先级插件，order 大于0
+        List<JanusPlugin> lowerPluginList = new ArrayList<>();
+        for (JanusPlugin janusPlugin : pluginList) {
+            if (janusPlugin.getOrder() < 0) {
+                higherPluginList.add(janusPlugin);
+            } else {
+                lowerPluginList.add(janusPlugin);
+            }
+        }
+        /* 返回数据 */
+        return PluginListDTO.builder()
+                .higherPluginList(higherPluginList)
+                .lowerPluginList(lowerPluginList)
+                .build();
     }
 
     /**

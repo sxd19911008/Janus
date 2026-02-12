@@ -15,6 +15,7 @@ public class PrimaryService implements TestInterface {
     @Janus(
             methodId = "testMethod",
             compareType = CompareType.SYNC_COMPARE,
+            businessKey = "buildKey(#request.key, 'qqq')",
             plugins = {ExecuteTimeJanusPlugin.class}
     )
     @Override

@@ -28,9 +28,11 @@ public class JanusTests {
     @Autowired
     private TestInterface testInterface;
 
+    public static String methodId = null;
     public static Long primaryTime = null;
     public static Long secondaryTime = null;
     public static Map<String, String> compareResMap = null;
+    public static String businessKey = null;
 
     @TestConfiguration
     @EnableAspectJAutoProxy(proxyTargetClass = true)
@@ -47,10 +49,12 @@ public class JanusTests {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Assertions.assertEquals("testMethod", methodId);
         Assertions.assertEquals(1, response1.getNumber());
         Assertions.assertTrue(primaryTime > 0);
         Assertions.assertTrue(secondaryTime > 0);
         Assertions.assertEquals("{}", JsonUtils.writeValueAsString(compareResMap));
+        Assertions.assertEquals("1_qqq", businessKey);
 
         TestResponse response2 = testInterface.testMethod(new TestRequest("2"));
         try {
@@ -58,9 +62,11 @@ public class JanusTests {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Assertions.assertEquals("testMethod", methodId);
         Assertions.assertEquals(2, response2.getNumber());
         Assertions.assertTrue(primaryTime > 0);
         Assertions.assertTrue(secondaryTime > 0);
         Assertions.assertEquals("{\"number\":\"2 / 3\"}", JsonUtils.writeValueAsString(compareResMap));
+        Assertions.assertEquals("2_qqq", businessKey);
     }
 }

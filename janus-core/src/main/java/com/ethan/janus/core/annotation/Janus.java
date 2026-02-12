@@ -1,7 +1,7 @@
 package com.ethan.janus.core.annotation;
 
-import com.ethan.janus.core.plugin.JanusPlugin;
 import com.ethan.janus.core.constants.CompareType;
+import com.ethan.janus.core.plugin.JanusPlugin;
 
 import java.lang.annotation.*;
 
@@ -17,8 +17,8 @@ public @interface Janus {
     // 比对类型
     CompareType compareType() default CompareType.NONE;
 
-    // 插件数组
-    Class<? extends JanusPlugin>[] plugins() default {};
+    // 业务数据键
+    String businessKey() default "";
 
     /*
      * 比对功能是否异步执行。
@@ -28,4 +28,7 @@ public @interface Janus {
      * 不配置该项时，默认为 true，表示异步执行比对功能。
      */
     boolean isAsyncCompare() default true;
+
+    // 插件数组
+    Class<? extends JanusPlugin>[] plugins() default {};
 }

@@ -34,6 +34,9 @@ public class JanusContextImpl implements JanusContext {
     // 唯一标识
     private String methodId;
 
+    // 业务数据键
+    private String businessKey;
+
     // 比对类型
     @Setter
     private CompareType compareType;

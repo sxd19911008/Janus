@@ -6,6 +6,8 @@ import java.util.Map;
 
 public interface JanusContext {
 
+    String getMethodId();
+    String getBusinessKey();
     CompareType getCompareType();
     Boolean getIsAsyncCompare();
     String getMasterBranchName();
