@@ -5,7 +5,6 @@ import com.ethan.janus.core.constants.JanusConstants;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -13,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @ConfigurationProperties(prefix = "janus")
-@Validated
 @Data
 public class JanusConfigProperties {
 
