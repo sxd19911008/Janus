@@ -1,5 +1,6 @@
 package com.ethan.janus.core.aspect;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  * <p>1. 可以防止影响正常功能
  * <p>2. 可以防止插件等附加功能之间互相影响
  */
+@Slf4j
 @Component
 @Aspect
 public class JanusCatchAspect {
@@ -21,13 +23,12 @@ public class JanusCatchAspect {
     public void allPluginsMethods() {}
 
     @Around("allPluginsMethods()")
-    public Object janusAspect(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object janusAspect(ProceedingJoinPoint joinPoint) {
         try {
             return joinPoint.proceed();
         } catch (Throwable e) {
             // 捕获日志并且打印日志，不可抛出日志导致流程中断
-            // TODO 日志框架
-            e.printStackTrace();
+            log.error("插件异常", e);
         }
         return null;
     }

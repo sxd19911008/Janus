@@ -16,6 +16,7 @@ import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.lifecycle.LifecycleDecoratorManager;
 import com.ethan.janus.core.plugin.JanusPlugin;
 import com.ethan.janus.core.utils.JanusUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 /**
  * Janus 核心
  */
+@Slf4j
 // 不能设置最小值，设置最小值会报错：java.lang.IllegalStateException: Required to bind 2 arguments, but only bound 1 (JoinPointMatch was NOT bound in invocation)
 @Order(Integer.MIN_VALUE + 1) // 设置最高优先级，让该切面最先执行
 @Component
@@ -125,8 +127,7 @@ public class JanusAspect {
             }
         } catch (Throwable e) {
             // 比对流程报错不影响主分支
-            // TODO 日志框架
-            e.printStackTrace();
+            log.error("比对分支运行时出现异常", e);
         }
 
         /* 执行主分支代码 */
@@ -138,8 +139,7 @@ public class JanusAspect {
             this.handleCompare(context);
         } catch (Throwable e) {
             // 比对流程报错不影响主分支
-            // TODO 日志框架
-            e.printStackTrace();
+            log.error("比对过程中出现异常", e);
         }
 
         /* 返回结果 */

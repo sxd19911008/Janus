@@ -8,6 +8,7 @@ import com.ethan.janus.core.constants.JanusConstants;
 import com.ethan.janus.core.dto.*;
 import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.utils.JanusUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.aspectj.MethodInvocationProceedingJoinPoint;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Janus 框架核心功能生命周期。包含框架中的所有核心功能。
  */
+@Slf4j
 @Component
 public class CoreLifecycle implements Lifecycle {
 
@@ -137,8 +139,7 @@ public class CoreLifecycle implements Lifecycle {
             CompareRes compareRes = janusCompare.compare(context.getPrimaryBranch(), context.getSecondaryBranch());
             context.setCompareRes(compareRes);
         } catch (Throwable e) {
-            e.printStackTrace();
-            // TODO 日志框架
+            log.error("比对过程中出现异常", e);
         }
     }
 

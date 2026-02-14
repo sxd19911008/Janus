@@ -5,6 +5,7 @@ import com.ethan.janus.core.exception.JanusException;
 import com.ethan.janus.core.plugin.JanusPlugin;
 import com.ethan.janus.core.utils.JanusAopUtils;
 import com.ethan.janus.core.utils.JanusUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class JanusPluginManager implements ApplicationRunner {
 
@@ -76,7 +78,7 @@ public class JanusPluginManager implements ApplicationRunner {
                     throw new JanusException("No plugin of type [" + aClass.getName() + "] found");
                 } else {
                     // 该插件为全局插件，不能放入list中，需要警告用户
-                    // TODO 日志框架 "全局插件不需要配置在 @Janus 注解中"
+                    log.error("全局插件不需要配置在 @Janus 注解中");
                 }
             }
             // 该插件为 方法级别的插件，正常放入list中
