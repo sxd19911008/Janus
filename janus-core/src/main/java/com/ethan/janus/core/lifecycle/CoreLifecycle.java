@@ -59,16 +59,7 @@ public class CoreLifecycle implements Lifecycle {
         }
         // 设置主分支和比对分支
         this.setMasterBranch(context);
-        if (log.isInfoEnabled()) {
-            log.info(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> masterBranch={}",
-                    JanusLogUtils.SUCCESS_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    "switchBranch",
-                    context.getMasterBranchName()
-            );
-        }
+        this.logInfo(context, "switchBranch", "masterBranch", context.getMasterBranchName());
     }
 
     /**
@@ -103,27 +94,11 @@ public class CoreLifecycle implements Lifecycle {
                             .res(res)
                             .build()
             );
-            if (log.isInfoEnabled()) {
-                log.info(
-                        "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> res={}",
-                        JanusLogUtils.SUCCESS_ICON,
-                        context.getMethodId(),
-                        context.getBusinessKey(),
-                        "primaryExecute",
-                        JanusLogUtils.toJsonString(res)
-                );
-            }
+            this.logInfo(context, "primaryExecute", "res", res);
         } catch (Throwable e) {
             // 保存异常对象
             branch.setException(e);
-            log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> exception=",
-                    JanusLogUtils.FAIL_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    "primaryExecute",
-                    e
-            );
+            this.logError(context, "primaryExecute", e);
         } finally {
             branch.setIsExecuted(true);
         }
@@ -150,27 +125,11 @@ public class CoreLifecycle implements Lifecycle {
                             .res(res)
                             .build()
             );
-            if (log.isInfoEnabled()) {
-                log.info(
-                        "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> res={}",
-                        JanusLogUtils.SUCCESS_ICON,
-                        context.getMethodId(),
-                        context.getBusinessKey(),
-                        "secondaryExecute",
-                        JanusLogUtils.toJsonString(res)
-                );
-            }
+            this.logInfo(context, "secondaryExecute", "res", res);
         } catch (Throwable e) {
             // 保存异常对象
             branch.setException(e);
-            log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> exception=",
-                    JanusLogUtils.FAIL_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    "secondaryExecute",
-                    e
-            );
+            this.logError(context, "secondaryExecute", e);
         } finally {
             branch.setIsExecuted(true);
         }
@@ -185,25 +144,9 @@ public class CoreLifecycle implements Lifecycle {
             JanusCompare janusCompare = context.getJanusCompare();
             CompareRes compareRes = janusCompare.compare(context.getPrimaryBranch(), context.getSecondaryBranch());
             context.setCompareRes(compareRes);
-            if (log.isInfoEnabled()) {
-                log.info(
-                        "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> compareRes={}",
-                        JanusLogUtils.SUCCESS_ICON,
-                        context.getMethodId(),
-                        context.getBusinessKey(),
-                        "compare",
-                        JanusLogUtils.toJsonString(compareRes)
-                );
-            }
+            this.logInfo(context, "compare", "compareRes", compareRes);
         } catch (Throwable e) {
-            log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> exception=",
-                    JanusLogUtils.FAIL_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    "compare",
-                    e
-            );
+            this.logError(context, "compare", e);
         }
     }
 
@@ -341,5 +284,36 @@ public class CoreLifecycle implements Lifecycle {
     private Method getPrimaryMethod(ProceedingJoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         return signature.getMethod();
+    }
+
+    /**
+     * 统一打印生命周期 Info 日志
+     */
+    private void logInfo(JanusContextImpl context, String lifecycle, String key, Object value) {
+        if (log.isInfoEnabled()) {
+            log.info(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> {}={}",
+                    JanusLogUtils.SUCCESS_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    lifecycle,
+                    key,
+                    JanusLogUtils.toJsonString(value)
+            );
+        }
+    }
+
+    /**
+     * 统一打印生命周期 Error 日志
+     */
+    private void logError(JanusContextImpl context, String lifecycle, Throwable e) {
+        log.error(
+                "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> exception=",
+                JanusLogUtils.FAIL_ICON,
+                context.getMethodId(),
+                context.getBusinessKey(),
+                lifecycle,
+                e
+        );
     }
 }

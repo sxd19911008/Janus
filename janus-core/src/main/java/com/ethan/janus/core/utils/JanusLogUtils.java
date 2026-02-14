@@ -13,7 +13,11 @@ public class JanusLogUtils {
 
     public static String toJsonString(Object object) {
         try {
-            return JanusJsonUtils.writeValueAsString(object);
+            if (object instanceof String) {
+                return String.valueOf(object);
+            } else {
+                return JanusJsonUtils.writeValueAsString(object);
+            }
         } catch (Throwable e) {
             log.error("[Janus] {} >> 对象序列化JSON字符串报错", FAIL_ICON, e);
         }
