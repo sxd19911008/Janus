@@ -287,7 +287,7 @@ public class CoreLifecycle implements Lifecycle {
     }
 
     /**
-     * 统一打印生命周期 Info 日志
+     * 统一打印 Info 日志
      */
     private void logInfo(JanusContextImpl context, String lifecycle, String key, Object value) {
         if (log.isInfoEnabled()) {
@@ -304,7 +304,7 @@ public class CoreLifecycle implements Lifecycle {
     }
 
     /**
-     * 统一打印生命周期 Error 日志
+     * 统一打印 Error 日志
      */
     private void logError(JanusContextImpl context, String lifecycle, Throwable e) {
         log.error(
