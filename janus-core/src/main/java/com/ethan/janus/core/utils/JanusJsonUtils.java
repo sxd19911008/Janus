@@ -316,6 +316,12 @@ public class JanusJsonUtils {
         if (strLen == 0) {
             return true;
         }
+        /*
+         * 不可用 string.trim() 来判断字符串是否全是空白字符。
+         * 因为 string.trim() 会创建一个新的字符串对象，不划算。
+         * 从 java 11 开始，可以用 string.isBlank() 来判断。
+         * 当前写法能兼容更多类型，也可以继续使用。
+         */
         for (int i = 0; i < strLen; i++) {
             if (!Character.isWhitespace(cs.charAt(i))) {
                 return false;
