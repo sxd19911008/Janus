@@ -91,9 +91,21 @@ public class JanusJsonUtils {
      * @return 差异Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
      */
     public static Map<String, String> compareObj(Object actual, Object expect) {
+        return compareObj(actual, expect, null);
+    }
+
+    /**
+     * 比对两个对象，支持忽略指定路径
+     *
+     * @param actual           实际对象
+     * @param expect           期望对象
+     * @param ignoreFieldPaths 忽略的字段路径集合
+     * @return 差异Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
+     */
+    public static Map<String, String> compareObj(Object actual, Object expect, Set<String> ignoreFieldPaths) {
         try {
             // 将对象转换为Json字符串后进行比对，利用Jackson的处理能力
-            return compareJson(ob.writeValueAsString(actual), ob.writeValueAsString(expect));
+            return compareJson(ob.writeValueAsString(actual), ob.writeValueAsString(expect), ignoreFieldPaths);
         } catch (Throwable e) {
             throw new RuntimeException("Jackson 序列化异常", e);
         }
@@ -107,13 +119,25 @@ public class JanusJsonUtils {
      * @return 差异 Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
      */
     public static Map<String, String> compareJson(String actual, String expect) {
+        return compareJson(actual, expect, null);
+    }
+
+    /**
+     * 比对两个 Json 字符串，支持忽略指定路径
+     *
+     * @param actual           实际 Json 串
+     * @param expect           期望 Json 串
+     * @param ignoreFieldPaths 忽略的字段路径集合
+     * @return 差异 Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
+     */
+    public static Map<String, String> compareJson(String actual, String expect, Set<String> ignoreFieldPaths) {
         Map<String, String> diffMap = new LinkedHashMap<>();
         if (isNotBlank(actual) && isNotBlank(expect)) {
             try {
                 JsonNode actualNode = ob.readTree(actual);
                 JsonNode expectNode = ob.readTree(expect);
                 // 开始递归比对
-                compareNodes("", actualNode, expectNode, diffMap);
+                compareNodes("", actualNode, expectNode, diffMap, ignoreFieldPaths);
             } catch (Throwable e) {
                 throw new RuntimeException("Jackson 比对异常", e);
             }
@@ -135,12 +159,18 @@ public class JanusJsonUtils {
     /**
      * 递归比对节点
      *
-     * @param path    当前路径
-     * @param actual  实际节点
-     * @param expect  期望节点
-     * @param diffMap 差异结果容器
+     * @param path             当前路径
+     * @param actual           实际节点
+     * @param expect           期望节点
+     * @param diffMap          差异结果容器
+     * @param ignoreFieldPaths 忽略的字段路径集合
      */
-    private static void compareNodes(String path, JsonNode actual, JsonNode expect, Map<String, String> diffMap) {
+    private static void compareNodes(String path, JsonNode actual, JsonNode expect, Map<String, String> diffMap, Set<String> ignoreFieldPaths) {
+        // 检查是否在忽略列表中
+        if (ignoreFieldPaths != null && ignoreFieldPaths.contains(path)) {
+            return;
+        }
+
         // 检查是否为 null 节点
         // 如果都是 null，认为一致
         if (actual.isNull() && expect.isNull()) {
@@ -159,10 +189,10 @@ public class JanusJsonUtils {
         // 根据类型分发处理
         if (actual.isObject() && expect.isObject()) {
             // 对象
-            compareObjects(path, (ObjectNode) actual, (ObjectNode) expect, diffMap);
+            compareObjects(path, (ObjectNode) actual, (ObjectNode) expect, diffMap, ignoreFieldPaths);
         } else if (actual.isArray() && expect.isArray()) {
             // 列表
-            compareArrays(path, (ArrayNode) actual, (ArrayNode) expect, diffMap);
+            compareArrays(path, (ArrayNode) actual, (ArrayNode) expect, diffMap, ignoreFieldPaths);
         } else if (actual.isValueNode() && expect.isValueNode()) {
             // 基本类型
             compareValues(path, (ValueNode) actual, (ValueNode) expect, diffMap);
@@ -175,25 +205,31 @@ public class JanusJsonUtils {
     /**
      * 比对对象节点 (ObjectNode)
      */
-    private static void compareObjects(String path, ObjectNode actual, ObjectNode expect, Map<String, String> diffMap) {
+    private static void compareObjects(String path, ObjectNode actual, ObjectNode expect, Map<String, String> diffMap, Set<String> ignoreFieldPaths) {
         Set<String> keySet = new HashSet<>();
         actual.fieldNames().forEachRemaining(keySet::add);
         expect.fieldNames().forEachRemaining(keySet::add);
 
         for (String key : keySet) {
+            String currentPath = buildPath(path, key);
+            // 提前检查忽略
+            if (ignoreFieldPaths != null && ignoreFieldPaths.contains(currentPath)) {
+                continue;
+            }
+
             JsonNode actualNode = actual.get(key);
             JsonNode expectNode = expect.get(key);
             if (isNull(actualNode) && isNull(expectNode)) {
                 continue;
             } else if (isNull(expectNode)) {
-                diffMap.put(buildPath(path, key), NOT_NULL + SEPARATOR + NULL);
+                diffMap.put(currentPath, NOT_NULL + SEPARATOR + NULL);
                 continue;
             } else if (isNull(actualNode)) {
-                diffMap.put(buildPath(path, key), NULL + SEPARATOR + NOT_NULL);
+                diffMap.put(currentPath, NULL + SEPARATOR + NOT_NULL);
                 continue;
             }
             // 递归比对
-            compareNodes(buildPath(path, key), actualNode, expectNode, diffMap);
+            compareNodes(currentPath, actualNode, expectNode, diffMap, ignoreFieldPaths);
         }
     }
 
@@ -201,7 +237,7 @@ public class JanusJsonUtils {
      * 比对数组节点 (ArrayNode)
      * 策略：按索引顺序比对，不排序
      */
-    private static void compareArrays(String path, ArrayNode actual, ArrayNode expect, Map<String, String> diffMap) {
+    private static void compareArrays(String path, ArrayNode actual, ArrayNode expect, Map<String, String> diffMap, Set<String> ignoreFieldPaths) {
         int actualSize = actual.size();
         int expectSize = expect.size();
 
@@ -212,7 +248,7 @@ public class JanusJsonUtils {
 
         for (int i = 0; i < actualSize; i++) {
             String idxPath = path + "[" + i + "]";
-            compareNodes(idxPath, actual.get(i), expect.get(i), diffMap);
+            compareNodes(idxPath, actual.get(i), expect.get(i), diffMap, ignoreFieldPaths);
         }
     }
 
