@@ -12,6 +12,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Janus 对外暴露的上下文
@@ -88,6 +89,10 @@ public class JanusContextImpl implements JanusContext {
     // 自定义数据
     @Getter
     private Map<Class<?>, Object> pluginDataMap;
+
+    // 比对时忽略的字段路径列表
+    @Getter
+    private Set<String> ignoreFieldPaths;
 
     public void setMasterBranchName(String masterBranchName) {
         // 只允许设置1次，不能随意修改该属性

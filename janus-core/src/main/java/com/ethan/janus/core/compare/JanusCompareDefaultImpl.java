@@ -9,13 +9,18 @@ import com.ethan.janus.core.utils.JanusJsonUtils;
 
 import java.util.Map;
 
+import com.ethan.janus.core.dto.JanusContext;
+
 /**
  * Janus 比对功能默认实现
  */
 public class JanusCompareDefaultImpl implements JanusCompare {
 
     @Override
-    public CompareRes compare(BranchInfo primaryBranch, BranchInfo secondaryBranch) {
+    public CompareRes compare(JanusContext context) {
+        BranchInfo primaryBranch = context.getPrimaryBranch();
+        BranchInfo secondaryBranch = context.getSecondaryBranch();
+
         CompareRes compareRes = new CompareRes();
         // 有异常，不需要比对具体的数据
         if (primaryBranch.isError() || secondaryBranch.isError()) {
@@ -28,7 +33,11 @@ public class JanusCompareDefaultImpl implements JanusCompare {
             }
         } else {
             // 无异常，比对具体的数据
-            Map<String, String> diffFieldMap = JanusJsonUtils.compareObj(primaryBranch.getBranchRes(), secondaryBranch.getBranchRes());
+            Map<String, String> diffFieldMap = JanusJsonUtils.compareObj(
+                    primaryBranch.getBranchRes(),
+                    secondaryBranch.getBranchRes(),
+                    context.getIgnoreFieldPaths()
+            );
             if (JanusUtils.isEmpty(diffFieldMap)) {
                 // diffFieldMap 为空代表比对通过，没有差异
                 compareRes.setCompareStatus(JanusConstants.SUCCESS);

@@ -36,4 +36,10 @@ public @interface Janus {
 
     // 插件数组
     Class<? extends JanusPlugin>[] plugins() default {};
+
+    /**
+     * 比对时忽略的字段路径列表
+     * 例如：{"id", "createTime", "user.password"}
+     */
+    String[] ignoreFieldPaths() default {};
 }

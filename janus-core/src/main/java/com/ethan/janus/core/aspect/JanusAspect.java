@@ -27,9 +27,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -100,6 +98,16 @@ public class JanusAspect {
             compareType = janus.compareType();
         }
 
+        /* 忽略字段 */
+        Set<String> ignoreFieldPaths;
+        String[] ignoreFieldPathsArr = janus.ignoreFieldPaths();
+        if (ignoreFieldPathsArr == null || ignoreFieldPathsArr.length == 0) {
+            ignoreFieldPaths = null;
+        } else {
+            ignoreFieldPaths = new HashSet<>(Arrays.asList(janus.ignoreFieldPaths()));
+        }
+
+
         /* 创建上下文对象 */
         JanusContextImpl context = JanusContextImpl.builder()
                 .joinPoint(joinPoint)
@@ -115,6 +123,7 @@ public class JanusAspect {
                 .primaryBranch(primaryBranch)
                 .secondaryBranch(secondaryBranch)
                 .pluginDataMap(new ConcurrentHashMap<>())
+                .ignoreFieldPaths(ignoreFieldPaths)
                 .build();
 
         this.logInfo(context, "Janus begin", "compareType", compareType.name());

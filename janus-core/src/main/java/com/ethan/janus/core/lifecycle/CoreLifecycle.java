@@ -142,7 +142,7 @@ public class CoreLifecycle implements Lifecycle {
     public void compare(JanusContextImpl context) {
         try {
             JanusCompare janusCompare = context.getJanusCompare();
-            CompareRes compareRes = janusCompare.compare(context.getPrimaryBranch(), context.getSecondaryBranch());
+            CompareRes compareRes = janusCompare.compare(context);
             context.setCompareRes(compareRes);
             this.logInfo(context, "compare", "compareRes", compareRes);
         } catch (Throwable e) {
