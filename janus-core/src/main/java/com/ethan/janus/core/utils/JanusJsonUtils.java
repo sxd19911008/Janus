@@ -124,12 +124,10 @@ public class JanusJsonUtils {
         } else if (isNotBlank(actual)) {
             diffMap.put("", NOT_NULL + SEPARATOR + NULL);
             return diffMap;
-        } else if (isNotBlank(expect)) {
+        } else {
             diffMap.put("", NULL + SEPARATOR + NOT_NULL);
             return diffMap;
         }
-
-        return diffMap;
     }
 
     /* ---------------- Internal Logic ---------------- */
@@ -142,8 +140,8 @@ public class JanusJsonUtils {
      * @param expect  期望节点
      * @param diffMap 差异结果容器
      */
-    private static void compareNodes(String path, JsonNode actual, JsonNode expect, Map<String, String> diffMap) throws Exception {
-        // 1. 检查是否为 null 节点
+    private static void compareNodes(String path, JsonNode actual, JsonNode expect, Map<String, String> diffMap) {
+        // 检查是否为 null 节点
         // 如果都是 null，认为一致
         if (actual.isNull() && expect.isNull()) {
             return;
@@ -158,7 +156,7 @@ public class JanusJsonUtils {
             return;
         }
 
-        // 3. 根据类型分发处理
+        // 根据类型分发处理
         if (actual.isObject() && expect.isObject()) {
             // 对象
             compareObjects(path, (ObjectNode) actual, (ObjectNode) expect, diffMap);
@@ -177,13 +175,10 @@ public class JanusJsonUtils {
     /**
      * 比对对象节点 (ObjectNode)
      */
-    private static void compareObjects(String path, ObjectNode actual, ObjectNode expect, Map<String, String> diffMap) throws Exception {
+    private static void compareObjects(String path, ObjectNode actual, ObjectNode expect, Map<String, String> diffMap) {
         Set<String> keySet = new HashSet<>();
         actual.fieldNames().forEachRemaining(keySet::add);
-
-        Set<String> expectFields = new HashSet<>();
-        expect.fieldNames().forEachRemaining(expectFields::add);
-        keySet.addAll(expectFields);
+        expect.fieldNames().forEachRemaining(keySet::add);
 
         for (String key : keySet) {
             JsonNode actualNode = actual.get(key);
@@ -198,7 +193,7 @@ public class JanusJsonUtils {
                 continue;
             }
             // 递归比对
-            compareNodes(buildPath(path, key), actual.get(key), expect.get(key), diffMap);
+            compareNodes(buildPath(path, key), actualNode, expectNode, diffMap);
         }
     }
 
@@ -206,7 +201,7 @@ public class JanusJsonUtils {
      * 比对数组节点 (ArrayNode)
      * 策略：按索引顺序比对，不排序
      */
-    private static void compareArrays(String path, ArrayNode actual, ArrayNode expect, Map<String, String> diffMap) throws Exception {
+    private static void compareArrays(String path, ArrayNode actual, ArrayNode expect, Map<String, String> diffMap) {
         int actualSize = actual.size();
         int expectSize = expect.size();
 
@@ -263,16 +258,55 @@ public class JanusJsonUtils {
     }
 
     /**
-     * 是否是空字符串
+     * <p>Checks if a CharSequence is empty (""), null or whitespace only.</p>
+     *
+     * <p>Whitespace is defined by {@link Character#isWhitespace(char)}.</p>
+     *
+     * <pre>
+     * StringUtils.isBlank(null)      = true
+     * StringUtils.isBlank("")        = true
+     * StringUtils.isBlank(" ")       = true
+     * StringUtils.isBlank("bob")     = false
+     * StringUtils.isBlank("  bob  ") = false
+     * </pre>
+     *
+     * @param cs  the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is null, empty or whitespace only
+     * @since 2.0
+     * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
      */
-    private static boolean isBlank(String str) {
-        return str == null || str.trim().isEmpty() || NULL.equals(str);
+    private static boolean isBlank(final CharSequence cs) {
+        final int strLen = length(cs);
+        if (strLen == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
      * 字符串是否非空
      */
-    private static boolean isNotBlank(String str) {
-        return !isBlank(str);
+    private static boolean isNotBlank(final CharSequence cs) {
+        return !isBlank(cs);
+    }
+
+    /**
+     * Gets a CharSequence length or {@code 0} if the CharSequence is
+     * {@code null}.
+     *
+     * @param cs
+     *            a CharSequence or {@code null}
+     * @return CharSequence length or {@code 0} if the CharSequence is
+     *         {@code null}.
+     * @since 2.4
+     * @since 3.0 Changed signature from length(String) to length(CharSequence)
+     */
+    private static int length(final CharSequence cs) {
+        return cs == null ? 0 : cs.length();
     }
 }
