@@ -87,7 +87,8 @@ public class CompareJsonTest {
         System.out.println("比对结果 Map=" + JanusJsonUtils.writeValueAsString(actualMap));
 
         // 解析预期结果
-        Map<String, String> expectedMap = JanusJsonUtils.readValue(expectedStr, new TypeReference<HashMap<String, String>>() {});
+        Map<String, String> expectedMap = JanusJsonUtils.readValue(expectedStr, new TypeReference<HashMap<String, String>>() {
+        });
 
         // 验证结果
         Set<String> keySet = new HashSet<>();
@@ -98,5 +99,80 @@ public class CompareJsonTest {
             String expected = expectedMap.get(key);
             Assertions.assertEquals(expected, actual);
         }
+    }
+
+    static Stream<Arguments> testCompareObjDataProvider() {
+        return Stream.of(
+                Arguments.of(
+                        null,
+                        null,
+                        null,
+                        "{}"
+                ),
+                Arguments.of(
+                        null,
+                        "{\"aa\":\"bb\"}",
+                        null,
+                        "{\"\":\"null / notNull\"}"
+                ),
+                Arguments.of(
+                        // 场景1：忽略根级别字段
+                        "{\"name\":\"John\", \"age\":30}",
+                        "{\"name\":\"John\", \"age\":31}",
+                        new HashSet<>(Collections.singletonList("age")),
+                        "{}"
+                ),
+                Arguments.of(
+                        // 场景4：忽略部分差异，保留其他差异
+                        "{\"a\":1, \"b\":2}",
+                        "{\"a\":2, \"b\":3}",
+                        new HashSet<>(Collections.singletonList("a")),
+                        "{\"b\":\"2 / 3\"}"
+                ),
+                Arguments.of(
+                        // 场景5：忽略不存在的字段（不应报错）
+                        "{\"a\":1}",
+                        "{\"a\":2}",
+                        new HashSet<>(Collections.singletonList("z")),
+                        "{\"a\":\"1 / 2\"}"
+                ),
+                Arguments.of(
+                        // 场景6：忽略 null vs notNull
+                        "{\"a\":null}",
+                        "{\"a\":1}",
+                        null,
+                        "{\"a\":\"null / notNull\"}"
+                )
+        );
+    }
+
+    @ParameterizedTest(name = "案例 {index}: 用户名={0}, 预期结果={2}")
+    @MethodSource("testCompareObjDataProvider")
+    public void testCompareObj(String actualJson, String expectJson, Set<String> ignoreFieldPaths, String expectedStr) {
+        // 测试比对
+        Map<String, String> actualMap = JanusJsonUtils.compareObj(this.stringToMap(actualJson), this.stringToMap(expectJson), ignoreFieldPaths);
+        System.out.println("比对结果 Map=" + JanusJsonUtils.writeValueAsString(actualMap));
+
+        // 解析预期结果
+        Map<String, String> expectedMap = JanusJsonUtils.readValue(expectedStr, new TypeReference<HashMap<String, String>>() {
+        });
+
+        // 验证结果
+        Set<String> keySet = new HashSet<>();
+        keySet.addAll(actualMap.keySet());
+        keySet.addAll(expectedMap.keySet());
+        for (String key : keySet) {
+            String actual = actualMap.get(key);
+            String expected = expectedMap.get(key);
+            Assertions.assertEquals(expected, actual);
+        }
+    }
+
+    private Map<String, String> stringToMap(String string) {
+        if (JanusUtils.isBlank(string)) {
+            return null;
+        }
+        return JanusJsonUtils.readValue(string, new TypeReference<HashMap<String, String>>() {
+        });
     }
 }

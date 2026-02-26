@@ -103,12 +103,11 @@ public class JanusJsonUtils {
      * @return 差异Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
      */
     public static Map<String, String> compareObj(Object actual, Object expect, Set<String> ignoreFieldPaths) {
-        try {
-            // 将对象转换为Json字符串后进行比对，利用Jackson的处理能力
-            return compareJson(ob.writeValueAsString(actual), ob.writeValueAsString(expect), ignoreFieldPaths);
-        } catch (Throwable e) {
-            throw new RuntimeException("Jackson 序列化异常", e);
-        }
+        JsonNode actualNode = ob.valueToTree(actual);
+        JsonNode expectNode = ob.valueToTree(expect);
+        Map<String, String> diffMap = new LinkedHashMap<>();
+        compareNodes("", actualNode, expectNode, diffMap, ignoreFieldPaths);
+        return diffMap;
     }
 
     /**
@@ -283,10 +282,10 @@ public class JanusJsonUtils {
     }
 
     /**
-     * 获取路径显示，如果是空字符串则显示 "ROOT" 或其他标识，这里保持为空字符串或者直接返回path
+     * 获取路径显示
      */
     private static String getPath(String path) {
-        return (path == null || path.isEmpty()) ? "ROOT" : path;
+        return (path == null || path.isEmpty()) ? "" : path;
     }
 
     private static boolean isNull(JsonNode node) {
@@ -306,7 +305,7 @@ public class JanusJsonUtils {
      * StringUtils.isBlank("  bob  ") = false
      * </pre>
      *
-     * @param cs  the CharSequence to check, may be null
+     * @param cs the CharSequence to check, may be null
      * @return {@code true} if the CharSequence is null, empty or whitespace only
      * @since 2.0
      * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
@@ -341,10 +340,9 @@ public class JanusJsonUtils {
      * Gets a CharSequence length or {@code 0} if the CharSequence is
      * {@code null}.
      *
-     * @param cs
-     *            a CharSequence or {@code null}
+     * @param cs a CharSequence or {@code null}
      * @return CharSequence length or {@code 0} if the CharSequence is
-     *         {@code null}.
+     * {@code null}.
      * @since 2.4
      * @since 3.0 Changed signature from length(String) to length(CharSequence)
      */
