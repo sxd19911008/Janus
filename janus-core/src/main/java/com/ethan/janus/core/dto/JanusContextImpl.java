@@ -94,6 +94,12 @@ public class JanusContextImpl implements JanusContext {
     @Getter
     private Set<String> ignoreFieldPaths;
 
+    @Override
+    public Object[] getArgs() {
+        return joinPoint.getArgs();
+    }
+
+    @Override
     public void setMasterBranchName(String masterBranchName) {
         // 只允许设置1次，不能随意修改该属性
         if (this.masterBranchName == null) {
@@ -103,22 +109,36 @@ public class JanusContextImpl implements JanusContext {
         }
     }
 
+    @Override
     public Boolean isCompare() {
         return this.isCompare;
     }
 
+    @Override
     public Boolean isNotCompare() {
         return !this.isCompare;
     }
 
+    @Override
     public Boolean isAsyncCompare() {
         return isAsyncCompare;
+    }
+
+    @Override
+    public void setPrimaryQueryRes(Object queryRes) {
+        this.primaryBranch.getBranchRes().setQueryRes(queryRes);
+    }
+
+    @Override
+    public void setSecondaryQueryRes(Object queryRes) {
+        this.secondaryBranch.getBranchRes().setQueryRes(queryRes);
     }
 
     public Object getPluginData(Class<?> clazz) {
         return this.pluginDataMap.get(clazz);
     }
 
+    @Override
     public void putPluginData(Class<?> clazz, Object data) {
         this.pluginDataMap.put(clazz, data);
     }

@@ -18,4 +18,5 @@ public class PluginRes {
     public CompareRes compareRes;
     public String businessKey;
     public String testAnnotationKey;
+    public Integer resTblNum;
 }

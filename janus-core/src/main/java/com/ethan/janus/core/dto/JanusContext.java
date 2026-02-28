@@ -10,6 +10,8 @@ public interface JanusContext {
     String getMethodId();
     String getBusinessKey();
     CompareType getCompareType();
+    Object[] getArgs();
+    void putPluginData(Class<?> clazz, Object data);
     Boolean isCompare();
     Boolean isNotCompare();
     void setIsCompare(Boolean isCompare);
@@ -19,6 +21,8 @@ public interface JanusContext {
     BranchInfo getSecondaryBranch();
     BranchInfo getMasterBranch();
     BranchInfo getCompareBranch();
+    void setPrimaryQueryRes(Object queryRes);
+    void setSecondaryQueryRes(Object queryRes);
     CompareRes getCompareRes();
 
     void setMasterBranchName(String masterBranchName);

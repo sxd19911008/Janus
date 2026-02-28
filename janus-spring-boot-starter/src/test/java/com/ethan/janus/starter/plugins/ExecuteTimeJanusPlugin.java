@@ -2,12 +2,15 @@ package com.ethan.janus.starter.plugins;
 
 import com.ethan.janus.core.dto.JanusContext;
 import com.ethan.janus.core.plugin.AbstractDataJanusPlugin;
+import com.ethan.janus.core.utils.JanusJsonUtils;
 import com.ethan.janus.starter.JanusTests;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Component
 public class ExecuteTimeJanusPlugin extends AbstractDataJanusPlugin<ExecuteTimeJanusPlugin.ExecuteTimeJanusPluginData> {
 
@@ -61,6 +64,13 @@ public class ExecuteTimeJanusPlugin extends AbstractDataJanusPlugin<ExecuteTimeJ
         if (testAnnotationJanusPluginData != null) {
             JanusTests.pluginRes.testAnnotationKey = testAnnotationJanusPluginData.getValue();
         }
+
+        log.info(
+                "primaryRes={}, secondaryRes={}, compareRes={}",
+                JanusJsonUtils.writeValueAsString(context.getPrimaryBranch().getBranchRes()),
+                JanusJsonUtils.writeValueAsString(context.getSecondaryBranch().getBranchRes()),
+                JanusJsonUtils.writeValueAsString(context.getCompareRes())
+        );
     }
 
     public static class ExecuteTimeJanusPluginData {

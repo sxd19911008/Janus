@@ -1,13 +1,19 @@
 package com.ethan.janus.starter.service;
 
 import com.ethan.janus.core.annotation.Secondary;
+import com.ethan.janus.starter.dao.TestRollbackMapper;
 import com.ethan.janus.starter.dto.TestRequest;
 import com.ethan.janus.starter.dto.TestResponse;
+import com.ethan.janus.starter.dto.TestRollbackEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Secondary
 @Service
 public class SecondaryService implements TestInterface {
+
+    @Autowired
+    private TestRollbackMapper testRollbackMapper;
 
     @Override
     public TestResponse testSyncCompare(TestRequest request) {
@@ -26,6 +32,25 @@ public class SecondaryService implements TestInterface {
 
     @Override
     public TestResponse testRollbackOne(TestRequest request) {
+        String key = request.getKey();
+        if ("a".equals(key)) {
+            Integer existNum = testRollbackMapper.selectNumByKey("exist");
+            testRollbackMapper.updateByKey("exist", existNum + 1);
+            testRollbackMapper.insert(TestRollbackEntity.builder()
+                    .tblKey(key)
+                    .tblNum(1)
+                    .build());
+            testRollbackMapper.insert(TestRollbackEntity.builder()
+                    .tblKey(key)
+                    .tblNum(2)
+                    .build());
+            testRollbackMapper.deleteByKey("delete");
+        } else if ("b".equals(key)) {
+            testRollbackMapper.updateByKey("pre", 20);
+        } else if ("err".equals(key)) {
+            testRollbackMapper.deleteByKey("pre");
+        }
+        testRollbackMapper.selectNumByKey("exist");
         return new TestResponse(0);
     }
 }
