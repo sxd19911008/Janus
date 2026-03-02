@@ -159,18 +159,7 @@ public class JanusAspect {
 
         /* 比对 */
         // 处理比对流程
-        try {
-            this.handleCompare(context);
-        } catch (Throwable e) {
-            // 比对流程报错不影响主分支
-            log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:handleCompare] >> exception=",
-                    JanusLogUtils.FAIL_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    e
-            );
-        }
+        this.handleCompare(context);
 
         /* 返回结果 */
         if (context.getMasterBranch().getException() != null) {
@@ -188,29 +177,40 @@ public class JanusAspect {
      * 处理比对流程，需要判断是否比对，如何比对等问题，以及
      */
     private void handleCompare(JanusContextImpl context) {
-        if (context.isNotCompare()) {
-            // 不比对，直接返回
-            return;
-        }
-        switch (context.getCompareType()) {
-            // 异步比对
-            case ASYNC_COMPARE:
-                janusBranchThreadPool.execute(() -> this.executeCompareBranchThenCompare(context));
-                break;
-            // 同步比对
-            case SYNC_COMPARE:
-                this.executeCompareBranchThenCompare(context);
-            case SYNC_ROLLBACK_ONE_COMPARE:
-            case SYNC_ROLLBACK_ALL_COMPARE:
-                // 该场景下，compareBranch 已经执行完，所以直进行比对
-                this.compare(context);
-                break;
-            // 不比对
-            case DO_NOT_COMPARE:
-                break;
-            // 默认报错
-            default:
-                throw new JanusException("不支持的 compareType 类型: [" + context.getCompareType() + "]");
+        try {
+            if (context.isNotCompare()) {
+                // 不比对，直接返回
+                return;
+            }
+            switch (context.getCompareType()) {
+                // 异步比对
+                case ASYNC_COMPARE:
+                    janusBranchThreadPool.execute(() -> this.executeCompareBranchThenCompare(context));
+                    break;
+                // 同步比对
+                case SYNC_COMPARE:
+                    this.executeCompareBranchThenCompare(context);
+                case SYNC_ROLLBACK_ONE_COMPARE:
+                case SYNC_ROLLBACK_ALL_COMPARE:
+                    // 该场景下，compareBranch 已经执行完，所以直进行比对
+                    this.compare(context);
+                    break;
+                // 不比对
+                case DO_NOT_COMPARE:
+                    break;
+                // 默认报错
+                default:
+                    throw new JanusException("不支持的 compareType 类型: [" + context.getCompareType() + "]");
+            }
+        } catch (Throwable e) {
+            // 比对流程报错不影响主分支
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:handleCompare] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    e
+            );
         }
     }
 
