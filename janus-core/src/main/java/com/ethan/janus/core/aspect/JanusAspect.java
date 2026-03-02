@@ -133,7 +133,15 @@ public class JanusAspect {
                 .ignoreFieldPaths(ignoreFieldPaths)
                 .build();
 
-        this.logInfo(context, "Janus begin", "compareType", compareType.name());
+        if (log.isInfoEnabled()) {
+            log.info(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:Janus begin] >> compareType={}",
+                    JanusLogUtils.SUCCESS_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    compareType.name()
+            );
+        }
 
         /* 分流 */
         context.getLifecycle().switchBranch(context);
@@ -146,7 +154,13 @@ public class JanusAspect {
             }
         } catch (Throwable e) {
             // 比对流程报错不影响主分支
-            this.logError(context, "compareBranchExecute", e);
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:compareBranchExecute] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    e
+            );
         }
 
         /* 执行主分支代码 */
@@ -158,7 +172,13 @@ public class JanusAspect {
             this.handleCompare(context);
         } catch (Throwable e) {
             // 比对流程报错不影响主分支
-            this.logError(context, "handleCompare", e);
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:handleCompare] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    e
+            );
         }
 
         /* 返回结果 */
@@ -301,36 +321,5 @@ public class JanusAspect {
         // 合并
         methodPluginList.addAll(globalPluginList);
         return methodPluginList;
-    }
-
-    /**
-     * 统一打印 Info 日志
-     */
-    private void logInfo(JanusContextImpl context, String lifecycle, String key, Object value) {
-        if (log.isInfoEnabled()) {
-            log.info(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> {}={}",
-                    JanusLogUtils.SUCCESS_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    lifecycle,
-                    key,
-                    JanusLogUtils.toJsonString(value)
-            );
-        }
-    }
-
-    /**
-     * 统一打印 Error 日志
-     */
-    private void logError(JanusContextImpl context, String lifecycle, Throwable e) {
-        log.error(
-                "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:{}] >> exception=",
-                JanusLogUtils.FAIL_ICON,
-                context.getMethodId(),
-                context.getBusinessKey(),
-                lifecycle,
-                e
-        );
     }
 }
