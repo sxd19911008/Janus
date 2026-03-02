@@ -146,25 +146,16 @@ public class JanusAspect {
         /* 分流 */
         context.getLifecycle().switchBranch(context);
 
-        /* CompareType 为 ROLLBACK 的场景下，先执行比对分支代码 */
-        try {
-            if (CompareType.hasRollback(compareType)) {
-                /* 执行比对分支代码 */
-                this.compareBranchExecute(context);
-            }
-        } catch (Throwable e) {
-            // 比对流程报错不影响主分支
-            log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:compareBranchExecute] >> exception=",
-                    JanusLogUtils.FAIL_ICON,
-                    context.getMethodId(),
-                    context.getBusinessKey(),
-                    e
-            );
+        /* 根据场景，在主线程中，选择分支代码执行 */
+        if (CompareType.hasRollback(compareType)) {
+            // CompareType 为 ROLLBACK 的场景下，先执行比对分支代码
+            this.compareBranchExecute(context);
+            // 执行主分支代码
+            this.masterBranchExecute(context);
+        } else {
+            // 没有 ROLLBACK 场景，仅运行主分支代码
+            this.masterBranchExecute(context);
         }
-
-        /* 执行主分支代码 */
-        this.masterBranchExecute(context);
 
         /* 比对 */
         // 处理比对流程
@@ -204,13 +195,15 @@ public class JanusAspect {
         switch (context.getCompareType()) {
             // 异步比对
             case ASYNC_COMPARE:
-                janusBranchThreadPool.execute(() -> this.compareTwoBranch(context));
+                janusBranchThreadPool.execute(() -> this.executeCompareBranchThenCompare(context));
                 break;
             // 同步比对
             case SYNC_COMPARE:
+                this.executeCompareBranchThenCompare(context);
             case SYNC_ROLLBACK_ONE_COMPARE:
             case SYNC_ROLLBACK_ALL_COMPARE:
-                this.compareTwoBranch(context);
+                // 该场景下，compareBranch 已经执行完，所以直进行比对
+                this.compare(context);
                 break;
             // 不比对
             case DO_NOT_COMPARE:
@@ -222,17 +215,26 @@ public class JanusAspect {
     }
 
     /**
-     * 比对，需要根据配置判断比对类型，比如异步比对、同步比对等。
+     * 先执行比对分支代码，然后比对2个分支的结果
      */
-    private void compareTwoBranch(JanusContextImpl context) {
+    private void executeCompareBranchThenCompare(JanusContextImpl context) {
         /* 执行比对分支代码 */
         this.compareBranchExecute(context);
+        /* 比对2个分支的结果 */
+        this.compare(context);
+    }
 
+    /**
+     * 比对2个分支的结果
+     * <p>需要根据配置判断比对类型，比如异步比对、同步比对等。
+     */
+    private void compare(JanusContextImpl context) {
         /* 比对 */
         if (context.isAsyncCompare()) {
+            // 比对过程异步执行
             janusCompareThreadPool.execute(() -> context.getLifecycle().compare(context));
         } else {
-            // 同步比对
+            // 比对过程在主线程中同步执行
             context.getLifecycle().compare(context);
         }
     }
@@ -248,7 +250,19 @@ public class JanusAspect {
      * 执行比对分支
      */
     private void compareBranchExecute(JanusContextImpl context) {
-        context.compareBranchExecute();
+        try {
+            // 执行比对分支代码
+            context.compareBranchExecute();
+        } catch (Throwable e) {
+            // 比对流程报错不影响主分支
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:compareBranchExecute] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    e
+            );
+        }
     }
 
     /**
