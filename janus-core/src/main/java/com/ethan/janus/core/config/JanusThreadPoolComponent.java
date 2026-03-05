@@ -33,11 +33,11 @@ public class JanusThreadPoolComponent {
 
         /* 创建线程池 */
         return new ThreadPoolExecutor(
-                JanusUtils.defaultIfNull(properties.getCorePoolSize(), 5),
-                JanusUtils.defaultIfNull(properties.getMaximumPoolSize(), 10),
-                JanusUtils.defaultIfNull(properties.getKeepAliveTime(), 1800L),
+                JanusUtils.defaultIfNull(properties.getCorePoolSize(), 16),
+                JanusUtils.defaultIfNull(properties.getMaximumPoolSize(), 16),
+                JanusUtils.defaultIfNull(properties.getKeepAliveTime(), 0L),
                 JanusUtils.defaultIfNull(properties.getUnit(), TimeUnit.SECONDS),
-                new LinkedBlockingDeque<>(JanusUtils.defaultIfNull(properties.getWorkQueueSize(), 50000)),
+                new LinkedBlockingDeque<>(JanusUtils.defaultIfNull(properties.getWorkQueueSize(), 10000)),
                 threadFactory,
                 JanusUtils.defaultIfNull(properties.getRejectedHandler(), new ThreadPoolExecutor.DiscardOldestPolicy())
         );
