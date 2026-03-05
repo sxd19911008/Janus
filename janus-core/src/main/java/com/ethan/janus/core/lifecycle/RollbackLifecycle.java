@@ -20,7 +20,7 @@ public class RollbackLifecycle extends LifecycleDecorator {
     public void primaryExecute(JanusContextImpl context) {
         // 被设置回滚标识则会回滚
         if (context.getPrimaryBranch().getIsRollback()) {
-            janusRollback.branchRollback(() -> decoratedLifecycle.primaryExecute(context));
+            janusRollback.branchRollback(context, "primaryExecute", () -> decoratedLifecycle.primaryExecute(context));
         } else { // 没有回滚标识会提交事务
             decoratedLifecycle.primaryExecute(context);
         }
@@ -30,7 +30,7 @@ public class RollbackLifecycle extends LifecycleDecorator {
     public void secondaryExecute(JanusContextImpl context) {
         // 被设置回滚标识则会回滚
         if (context.getSecondaryBranch().getIsRollback()) {
-            janusRollback.branchRollback(() -> decoratedLifecycle.secondaryExecute(context));
+            janusRollback.branchRollback(context, "secondaryExecute", () -> decoratedLifecycle.secondaryExecute(context));
         } else { // 没有回滚标识会提交事务
             decoratedLifecycle.secondaryExecute(context);
         }
