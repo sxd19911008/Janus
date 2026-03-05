@@ -13,13 +13,13 @@ public class JanusThreadPoolConfig {
     @Autowired
     private JanusThreadPoolComponent janusThreadPoolComponent;
 
-    @Bean
+    @Bean(name = "janusBranchThreadPool")
     @ConditionalOnMissingBean(name = "janusBranchThreadPool")
     public ExecutorService janusBranchThreadPool() {
         return janusThreadPoolComponent.getJanusBranchThreadPool();
     }
 
-    @Bean
+    @Bean(name = "janusCompareThreadPool")
     @ConditionalOnMissingBean(name = "janusCompareThreadPool")
     public ExecutorService janusCompareThreadPool() {
         return janusThreadPoolComponent.getJanusCompareThreadPool();

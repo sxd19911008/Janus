@@ -23,6 +23,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -51,8 +52,10 @@ public class JanusAspect {
     private JanusPluginManager janusPluginManager;
     @Autowired
     private JanusCompareManager janusCompareManager;
+    @Qualifier("janusBranchThreadPool")
     @Autowired
     private ExecutorService janusBranchThreadPool;
+    @Qualifier("janusCompareThreadPool")
     @Autowired
     private ExecutorService janusCompareThreadPool;
     @Autowired

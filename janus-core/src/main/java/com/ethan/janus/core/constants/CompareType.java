@@ -19,6 +19,15 @@ public enum CompareType {
     }
 
     /**
+     * 是否异步执行比对分支
+     * @param compareType 比对类型
+     * @return true-异步执行比对分支；false-同步执行比对分支
+     */
+    public static boolean isAsyncCompareBranch(CompareType compareType) {
+        return CompareType.ASYNC_COMPARE.equals(compareType);
+    }
+
+    /**
      * 是否回滚 master 分支
      *
      * @param compareType 比对类型
