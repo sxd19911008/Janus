@@ -159,7 +159,7 @@ public class JanusAspect {
         context.getLifecycle().switchBranch(context);
 
         /* 统计当前方法的流量 */
-        this.countAsyncCompareBranchMethod(context, method);
+        this.incrementMethodCountMap(context, method);
 
         /* 根据场景，在主线程中，选择分支代码执行 */
         if (CompareType.hasRollback(compareType)) {
@@ -229,7 +229,7 @@ public class JanusAspect {
                         return;
                     }
                     // 异步执行 compareBranch，然后比对2个分支的结果
-                    janusBranchThreadPool.execute(() -> this.executeCompareBranchThenCompare(context));
+                    janusBranchThreadPool.execute(() -> this.executeCompareBranchThenCompare(context, method));
                     break;
                 // 同步比对
                 case SYNC_COMPARE:
@@ -266,6 +266,19 @@ public class JanusAspect {
         this.compareBranchExecute(context);
         /* 比对2个分支的结果 */
         this.compare(context);
+    }
+
+    /**
+     * 先执行比对分支代码，然后比对2个分支的结果。执行完后，计数器减1
+     */
+    private void executeCompareBranchThenCompare(JanusContextImpl context, Method method) {
+        try {
+            /* 执行比对分支代码 */
+            this.executeCompareBranchThenCompare(context);
+        } finally {
+            // 计数器减一
+            this.decrementMethodCountMap(context, method);
+        }
     }
 
     /**
@@ -383,25 +396,28 @@ public class JanusAspect {
 
 
     /**
-     * 统计当前方法的流量
+     * 流量计数器加 1
      *
      * @param context 上下文
      * @param method  切点方法
      */
-    private void countAsyncCompareBranchMethod(JanusContextImpl context, Method method) {
+    private void incrementMethodCountMap(JanusContextImpl context, Method method) {
         try {
             // 校验开关
             if (janusConfigProperties.getAsyncCompareThrottling().isClosed()) {
                 return;
             }
-            // 异步执行比对分支，且需要比对时，才统计
+            // 异步执行比对分支，且需要比对时，才操作计数器
             if (CompareType.isAsyncCompareBranch(context.getCompareType()) && context.isCompare()) {
-                this.getLongAdder(method).incrementAndGet();
+                // ConcurrentHashMap 配合 computeIfAbsent 可以保证线程安全
+                AtomicInteger atomicInteger = methodCountMap.computeIfAbsent(method, k -> new AtomicInteger(0));
+                // 计数器加 1
+                atomicInteger.incrementAndGet();
             }
         } catch (Throwable e) {
             // 统计报错不影响主分支
             log.error(
-                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:countAsyncCompareBranchMethod] >> exception=",
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:incrementMethodCountMap] >> exception=",
                     JanusLogUtils.FAIL_ICON,
                     context.getMethodId(),
                     context.getBusinessKey(),
@@ -411,14 +427,33 @@ public class JanusAspect {
     }
 
     /**
-     * 获取当前切点方法的正在 JanusAspect 中异步比对的数量计数器
+     * 流量计数器减 1
      *
-     * @param method 切点方法
-     * @return 正在 JanusAspect 中异步比对的数量计数器
+     * @param context 上下文
+     * @param method  切点方法
      */
-    private AtomicInteger getLongAdder(Method method) {
-        // ConcurrentHashMap 配合 computeIfAbsent 可以保证线程安全
-        return methodCountMap.computeIfAbsent(method, k -> new AtomicInteger(0));
+    private void decrementMethodCountMap(JanusContextImpl context, Method method) {
+        try {
+            // 校验开关
+            if (janusConfigProperties.getAsyncCompareThrottling().isClosed()) {
+                return;
+            }
+            // 异步执行比对分支，且需要比对时，才操作计数器
+            if (CompareType.isAsyncCompareBranch(context.getCompareType()) && context.isCompare()) {
+                AtomicInteger atomicInteger = methodCountMap.get(method);
+                // 计数器减 1
+                atomicInteger.decrementAndGet();
+            }
+        } catch (Throwable e) {
+            // 统计报错不影响主分支
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:decrementMethodCountMap] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    context.getMethodId(),
+                    context.getBusinessKey(),
+                    e
+            );
+        }
     }
 
     /**
