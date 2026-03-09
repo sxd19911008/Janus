@@ -128,7 +128,6 @@ public class JanusAspect {
             ignoreFieldPaths = ignoreFieldPathsMap.computeIfAbsent(method, k -> new HashSet<>(Arrays.asList(ignoreFieldPathsArr)));
         }
 
-
         /* 创建上下文对象 */
         JanusContextImpl context = JanusContextImpl.builder()
                 .joinPoint(joinPoint)
@@ -226,6 +225,8 @@ public class JanusAspect {
                 case ASYNC_COMPARE:
                     // 如果当前方法已经积压太多的比对任务，则丢弃当前的比对任务
                     if (this.shouldThrottle(method)) {
+                        // 计数器减一
+                        this.decrementMethodCountMap(context, method);
                         return;
                     }
                     // 异步执行 compareBranch，然后比对2个分支的结果
@@ -438,12 +439,9 @@ public class JanusAspect {
             if (janusConfigProperties.getAsyncCompareThrottling().isClosed()) {
                 return;
             }
-            // 异步执行比对分支，且需要比对时，才操作计数器
-            if (CompareType.isAsyncCompareBranch(context.getCompareType()) && context.isCompare()) {
-                AtomicInteger atomicInteger = methodCountMap.get(method);
-                // 计数器减 1
-                atomicInteger.decrementAndGet();
-            }
+            AtomicInteger atomicInteger = methodCountMap.get(method);
+            // 计数器减 1
+            atomicInteger.decrementAndGet();
         } catch (Throwable e) {
             // 统计报错不影响主分支
             log.error(
@@ -487,10 +485,10 @@ public class JanusAspect {
         Collection<AtomicInteger> values = methodCountMap.values();
         int totalCount = values.stream().mapToInt(AtomicInteger::get).sum(); // 当前总数量
         int activeMethodsNum = values.size(); // 当前切面处理过的异步执行compareBranch的总方法数
-        long average = totalCount / activeMethodsNum; // 每个方法的平均流量
+        int average = totalCount / activeMethodsNum; // 每个方法的平均流量
 
         // 如果当前方法并发数超过平均值，则触发限流
-        return currentMethodCount > average;
+        return currentMethodCount >= average;
     }
 
     /**

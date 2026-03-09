@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @Secondary
 @Service
@@ -19,6 +20,25 @@ public class SecondaryService implements TestInterface {
 
     @Autowired
     private TestRollbackMapper testRollbackMapper;
+
+    @Override
+    public TestResponse testAsyncCompare1(TestRequest request) {
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return TestResponse.builder()
+                .number(0)
+                .build();
+    }
+
+    @Override
+    public TestResponse testAsyncCompare2(TestRequest request) {
+        return TestResponse.builder()
+                .number(0)
+                .build();
+    }
 
     @Override
     public TestResponse testSyncCompare(TestRequest request) {

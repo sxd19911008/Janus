@@ -1,0 +1,7 @@
+janus:
+  janus-branch-thread-pool:
+    core-pool-size: 1
+    maximum-pool-size: 1
+    work-queue-size: 100
+  async-compare-throttling:
+    limit-ratio: 0.1

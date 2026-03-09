@@ -8,9 +8,7 @@ import com.ethan.janus.starter.dto.TestIgnoreDTO;
 import com.ethan.janus.starter.dto.TestRequest;
 import com.ethan.janus.starter.dto.TestResponse;
 import com.ethan.janus.starter.dto.TestRollbackEntity;
-import com.ethan.janus.starter.plugins.SwitchJanusPlugin;
-import com.ethan.janus.starter.plugins.TestAnnotationJanusPlugin;
-import com.ethan.janus.starter.plugins.TestRollbackQueryDataJanusPlugin;
+import com.ethan.janus.starter.plugins.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -27,11 +25,36 @@ public class PrimaryService implements TestInterface {
     private TestRollbackMapper testRollbackMapper;
 
     @Janus(
+            methodId = "testAsyncCompare1",
+            compareType = CompareType.ASYNC_COMPARE,
+            businessKey = "#request.key",
+            plugins = {AsyncSwitchJanusPlugin.class, AsyncCountJanusPlugin.class}
+    )
+    public TestResponse testAsyncCompare1(TestRequest request) {
+        return TestResponse.builder()
+                .number(0)
+                .build();
+    }
+
+    @Janus(
+            methodId = "testAsyncCompare2",
+            compareType = CompareType.ASYNC_COMPARE,
+            businessKey = "#request.key",
+            plugins = {AsyncSwitchJanusPlugin.class, AsyncResJanusPlugin.class}
+    )
+    @Override
+    public TestResponse testAsyncCompare2(TestRequest request) {
+        return TestResponse.builder()
+                .number(0)
+                .build();
+    }
+
+    @Janus(
             methodId = "testSyncCompare",
             compareType = CompareType.SYNC_COMPARE,
             isAsyncCompare = false,
             businessKey = "buildKey(#request.key, 'qqq')",
-            plugins = {SwitchJanusPlugin.class, TestAnnotationJanusPlugin.class}
+            plugins = {SwitchJanusPlugin.class, TestAnnotationJanusPlugin.class, ExecuteTimeJanusPlugin.class}
     )
     @TestAnnotation(value = "Archimonde")
     @Override
@@ -60,7 +83,7 @@ public class PrimaryService implements TestInterface {
             compareType = CompareType.SYNC_ROLLBACK_ONE_COMPARE,
             isAsyncCompare = false,
             businessKey = "#request.key",
-            plugins = {TestRollbackQueryDataJanusPlugin.class}
+            plugins = {TestRollbackQueryDataJanusPlugin.class, ExecuteTimeJanusPlugin.class}
     )
     @Transactional(rollbackFor = Throwable.class)
     @Override
@@ -114,7 +137,7 @@ public class PrimaryService implements TestInterface {
             compareType = CompareType.SYNC_ROLLBACK_ALL_COMPARE,
             isAsyncCompare = false,
             businessKey = "#request.key",
-            plugins = {TestRollbackQueryDataJanusPlugin.class}
+            plugins = {TestRollbackQueryDataJanusPlugin.class, ExecuteTimeJanusPlugin.class}
     )
     @Transactional(rollbackFor = Throwable.class)
     @Override
@@ -167,6 +190,7 @@ public class PrimaryService implements TestInterface {
             methodId = "testIgnore",
             compareType = CompareType.SYNC_COMPARE,
             isAsyncCompare = false,
+            plugins = ExecuteTimeJanusPlugin.class,
             ignoreFieldPaths = {"res.ignoreStr1", "res.ignoreList.str2"}
     )
     @Override

@@ -36,6 +36,7 @@ public class JanusTests {
     private JdbcTemplate jdbcTemplate;
 
     public static PluginRes pluginRes;
+    public static String globalString;
 
     static Stream<Arguments> testSyncCompareDataProvider() {
         return Stream.of(
@@ -72,6 +73,7 @@ public class JanusTests {
         pluginRes.primaryTime = null;
         Assertions.assertTrue(pluginRes.secondaryTime > 0);
         pluginRes.secondaryTime = null;
+        Assertions.assertEquals("Global", globalString);
         Map<String, Object> actual = new HashMap<>();
         actual.put("response", response);
         actual.put("pluginRes", pluginRes);
