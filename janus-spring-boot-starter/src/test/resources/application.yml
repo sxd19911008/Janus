@@ -5,3 +5,9 @@ janus:
     work-queue-size: 100
   async-compare-throttling:
     limit-ratio: 0.1
+
+logging:
+  level:
+    com:
+      ethan:
+        janus: DEBUG

@@ -16,4 +16,6 @@ public interface TestInterface {
     TestResponse testRollbackAll(TestRequest request);
 
     TestResponse testIgnore();
+
+    void testCompareThrottling(TestRequest request);
 }

@@ -166,4 +166,8 @@ public class SecondaryService implements TestInterface {
                 )))
                 .build();
     }
+
+    @Override
+    public void testCompareThrottling(TestRequest request) {
+    }
 }

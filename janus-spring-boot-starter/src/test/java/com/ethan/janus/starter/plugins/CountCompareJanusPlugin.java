@@ -6,7 +6,7 @@ import com.ethan.janus.starter.JanusThrottlingTests;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AsyncCountJanusPlugin implements JanusPlugin {
+public class CountCompareJanusPlugin implements JanusPlugin {
 
     @Override
     public void afterCompare(JanusContext context) {

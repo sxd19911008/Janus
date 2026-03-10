@@ -28,7 +28,7 @@ public class PrimaryService implements TestInterface {
             methodId = "testAsyncCompare1",
             compareType = CompareType.ASYNC_COMPARE,
             businessKey = "#request.key",
-            plugins = {AsyncSwitchJanusPlugin.class, AsyncCountJanusPlugin.class}
+            plugins = {AsyncSwitchJanusPlugin.class, CountCompareJanusPlugin.class}
     )
     public TestResponse testAsyncCompare1(TestRequest request) {
         return TestResponse.builder()
@@ -203,5 +203,20 @@ public class PrimaryService implements TestInterface {
                         TestIgnoreDTO.builder().str1("1").str2("2").build()
                 )))
                 .build();
+    }
+
+    /**
+     * 测试比对限流场景。
+     * <p>限制比对流量，比如只比3个调用，超过三次，后面所有的调用都不比对。
+     */
+    @Janus(
+            methodId = "testCompareThrottling",
+            compareType = CompareType.SYNC_COMPARE,
+            isAsyncCompare = false,
+            plugins = {CompareThrottlingJanusPlugin.class, CountCompare2JanusPlugin.class}
+    )
+    @Override
+    public void testCompareThrottling(TestRequest request) {
+
     }
 }
