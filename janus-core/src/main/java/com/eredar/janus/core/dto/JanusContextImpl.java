@@ -4,6 +4,7 @@ import com.eredar.janus.core.compare.JanusCompare;
 import com.eredar.janus.core.constants.CompareType;
 import com.eredar.janus.core.exception.JanusException;
 import com.eredar.janus.core.lifecycle.Lifecycle;
+import com.eredar.janus.core.plugin.AbstractDataJanusPlugin;
 import com.eredar.janus.core.plugin.JanusPlugin;
 import com.eredar.janus.core.utils.JanusUtils;
 import lombok.*;
@@ -93,6 +94,12 @@ public class JanusContextImpl implements JanusContext {
     // 比对时忽略的字段路径列表
     @Getter
     private Set<String> ignoreFieldPaths;
+
+    @Getter
+    private Long primaryTime;
+
+    @Getter
+    private Long secondaryTime;
 
     @Override
     public Object[] getArgs() {
@@ -184,6 +191,40 @@ public class JanusContextImpl implements JanusContext {
         } else {
             // 该分支是 secondary 分支
             lifecycle.secondaryExecute(this);
+        }
+    }
+
+    public void setPrimaryTime(Long primaryTime) {
+        // 只允许设置1次，不能随意修改该属性
+        if (this.primaryTime == null) {
+            this.primaryTime = primaryTime;
+        } else {
+            throw new JanusException("primaryTime 只能设置1次");
+        }
+    }
+
+    public void setSecondaryTime(Long secondaryTime) {
+        // 只允许设置1次，不能随意修改该属性
+        if (this.secondaryTime == null) {
+            this.secondaryTime = secondaryTime;
+        } else {
+            throw new JanusException("secondaryTime 只能设置1次");
+        }
+    }
+
+    /**
+     * 根据插件类，获取其他插件数据对象
+     * <p>如果没找到，会返回null
+     *
+     * @return 插件数据对象
+     */
+    public <OTH> OTH getOtherPluginData(Class<? extends AbstractDataJanusPlugin<OTH>> pluginClass) {
+        Object pluginDataObj = this.getPluginData(pluginClass);
+        if (pluginDataObj != null) {
+            //noinspection unchecked
+            return (OTH) pluginDataObj;
+        } else {
+            return null;
         }
     }
 }

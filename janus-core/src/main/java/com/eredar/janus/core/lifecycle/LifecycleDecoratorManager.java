@@ -17,6 +17,8 @@ public class LifecycleDecoratorManager extends LifecycleDecorator {
     @Autowired
     private CoreLifecycle coreLifecycle;
     @Autowired
+    private TimeLifecycle timeLifecycle;
+    @Autowired
     private RollbackLifecycle rollbackLifecycle;
     @Autowired
     private HigherPluginsExecuteLifecycle higherPluginsExecuteLifecycle;
@@ -31,6 +33,7 @@ public class LifecycleDecoratorManager extends LifecycleDecorator {
         this.setDecoratedLifecycle(higherPluginsExecuteLifecycle)
                 .setDecoratedLifecycle(rollbackLifecycle)
                 .setDecoratedLifecycle(lowerPluginsExecuteLifecycle)
+                .setDecoratedLifecycle(timeLifecycle)
                 .setDecoratedLifecycle(coreLifecycle);
     }
 

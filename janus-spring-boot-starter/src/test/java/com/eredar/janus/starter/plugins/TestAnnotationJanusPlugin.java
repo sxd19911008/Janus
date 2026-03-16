@@ -3,6 +3,8 @@ package com.eredar.janus.starter.plugins;
 import com.eredar.janus.core.dto.JanusContext;
 import com.eredar.janus.core.plugin.AbstractDataJanusPlugin;
 import com.eredar.janus.starter.annotation.TestAnnotation;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,15 +16,9 @@ public class TestAnnotationJanusPlugin extends AbstractDataJanusPlugin<TestAnnot
         pluginData.setValue(annotation.value());
     }
 
+    @Setter
+    @Getter
     public static class TestAnnotationJanusPluginData {
         private String value;
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
     }
 }

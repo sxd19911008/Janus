@@ -16,44 +16,11 @@ import java.time.LocalDateTime;
 public class ExecuteTimeJanusPlugin extends AbstractDataJanusPlugin<ExecuteTimeJanusPlugin.ExecuteTimeJanusPluginData> {
 
     @Override
-    public void beforePrimaryExecute(JanusContext context) {
-        ExecuteTimeJanusPluginData pluginData = this.getPluginData(context);
-        StopWatch sw = new StopWatch();
-        pluginData.setPrimaryStopWatch(sw);
-        sw.start("Janus-primary");
-        pluginData.setPrimaryStartDate(LocalDateTime.now());
-    }
-
-    @Override
-    public void afterPrimaryExecute(JanusContext context) {
-        ExecuteTimeJanusPluginData pluginData = this.getPluginData(context);
-        pluginData.getPrimaryStopWatch().stop();
-        pluginData.setPrimaryEndDate(LocalDateTime.now());
-    }
-
-    @Override
-    public void beforeSecondaryExecute(JanusContext context) {
-        ExecuteTimeJanusPluginData pluginData = this.getPluginData(context);
-        StopWatch sw = new StopWatch();
-        pluginData.setSecondaryStopWatch(sw);
-        sw.start("Janus-secondary");
-        pluginData.setSecondaryStartDate(LocalDateTime.now());
-    }
-
-    @Override
-    public void afterSecondaryExecute(JanusContext context) {
-        ExecuteTimeJanusPluginData pluginData = this.getPluginData(context);
-        pluginData.getSecondaryStopWatch().stop();
-        pluginData.setSecondaryEndDate(LocalDateTime.now());
-    }
-
-    @Override
     public void beforeCompare(JanusContext context) {
-        ExecuteTimeJanusPluginData pluginData = this.getPluginData(context);
         // primary 分支耗时
-        JanusTests.pluginRes.primaryTime = pluginData.getPrimaryStopWatch().getTotalTimeNanos();
+        JanusTests.pluginRes.primaryTime = context.getPrimaryTime();
         // secondary 分支耗时
-        JanusTests.pluginRes.secondaryTime = pluginData.getSecondaryStopWatch().getTotalTimeNanos();
+        JanusTests.pluginRes.secondaryTime = context.getSecondaryTime();
     }
 
     @Override
@@ -62,7 +29,7 @@ public class ExecuteTimeJanusPlugin extends AbstractDataJanusPlugin<ExecuteTimeJ
         JanusTests.pluginRes.masterBranchName = context.getMasterBranchName();
         JanusTests.pluginRes.compareRes = context.getCompareRes();
         JanusTests.pluginRes.businessKey = context.getBusinessKey();
-        TestAnnotationJanusPlugin.TestAnnotationJanusPluginData testAnnotationJanusPluginData = this.getOtherPluginData(context, TestAnnotationJanusPlugin.class);
+        TestAnnotationJanusPlugin.TestAnnotationJanusPluginData testAnnotationJanusPluginData = context.getOtherPluginData(TestAnnotationJanusPlugin.class);
         if (testAnnotationJanusPluginData != null) {
             JanusTests.pluginRes.testAnnotationKey = testAnnotationJanusPluginData.getValue();
         }

@@ -60,21 +60,4 @@ public class AbstractDataJanusPlugin<T> implements JanusPlugin {
             throw new JanusException("请设置插件数据实体类的泛型");
         }
     }
-
-    /**
-     * 根据插件类，获取其他插件数据对象
-     * <p>如果没找到，会返回null
-     *
-     * @return 插件数据对象
-     */
-    protected final <OTH> OTH getOtherPluginData(JanusContext context, Class<? extends AbstractDataJanusPlugin<OTH>> pluginClass) {
-        JanusContextImpl janusContextImpl = (JanusContextImpl) context;
-        Object pluginDataObj = janusContextImpl.getPluginData(pluginClass);
-        if (pluginDataObj != null) {
-            //noinspection unchecked
-            return (OTH) pluginDataObj;
-        } else {
-            return null;
-        }
-    }
 }
