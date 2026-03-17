@@ -3,7 +3,6 @@ package com.eredar.janus.starter;
 import com.eredar.janus.core.utils.JanusJsonUtils;
 import com.eredar.janus.starter.dto.PluginRes;
 import com.eredar.janus.starter.dto.TestRequest;
-import com.eredar.janus.starter.dto.TestResponse;
 import com.eredar.janus.starter.service.TestInterface;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Assertions;
@@ -48,11 +47,11 @@ public class JanusThrottlingTests {
 
         /* 执行测试方法 */
         for (int i = 0; i < 20; i++) {
-            TestResponse response = testInterface.testAsyncCompare1(request);
+            testInterface.testAsyncCompare1(request);
         }
 
         pluginRes = new PluginRes();
-        TestResponse response = testInterface.testAsyncCompare2(request);
+        testInterface.testAsyncCompare2(request);
 
         try {
             TimeUnit.SECONDS.sleep(15);
