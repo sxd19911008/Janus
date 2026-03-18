@@ -1,11 +1,14 @@
 package com.eredar.janus.core.lifecycle;
 
 import com.eredar.janus.core.dto.JanusContextImpl;
+import com.eredar.janus.core.utils.JanusLogUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * 统计分支耗时，精确到纳秒
  */
+@Slf4j
 @Component
 public class TimeLifecycle extends LifecycleDecorator {
 
@@ -20,6 +23,13 @@ public class TimeLifecycle extends LifecycleDecorator {
         decoratedLifecycle.primaryExecute(context);
         time = System.nanoTime() - time;
         context.setPrimaryTime(time);
+        log.debug(
+                "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:primaryExecute] >> timeTaken={}ns",
+                JanusLogUtils.SUCCESS_ICON,
+                context.getMethodId(),
+                context.getBusinessKey(),
+                time
+        );
     }
 
     @Override
@@ -28,6 +38,13 @@ public class TimeLifecycle extends LifecycleDecorator {
         decoratedLifecycle.secondaryExecute(context);
         time = System.nanoTime() - time;
         context.setSecondaryTime(time);
+        log.debug(
+                "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:secondaryExecute] >> timeTaken={}ns",
+                JanusLogUtils.SUCCESS_ICON,
+                context.getMethodId(),
+                context.getBusinessKey(),
+                time
+        );
     }
 
     @Override
