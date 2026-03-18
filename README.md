@@ -279,7 +279,8 @@ public class SaveLogJanusPlugin implements JanusPlugin {
     @Override
     public void afterCompare(JanusContext context) {
         // 获取 GetLogJanusPlugin 插件本次分流比对的相关数据
-        GetLogJanusPlugin.GetLogJanusPluginData getLogJanusPlugin = context.getOtherPluginData(GetLogJanusPlugin.class);
+        GetLogJanusPlugin.GetLogJanusPluginData getLogJanusPlugin =
+                context.getOtherPluginData(GetLogJanusPlugin.class);
         // ......
     }
 }
@@ -315,4 +316,10 @@ public class GlobalJanusPlugin implements JanusPlugin {
 }
 ```
 
+## 日志打印
 
+日志打印采用`slf4j`抽象层框架，不提供具体实现。
+
+运行日志级别为`DEBUG`级别。异常日志为`ERROR`级别。
+
+有对插件的每个方法进行运行时间追踪的日志，为`TRACE`级别。
