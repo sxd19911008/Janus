@@ -450,7 +450,8 @@ Janus框架的整个分流比对过程，分为4个生命周期：
 
 最低优先级为`JanusPlugin.LOWEST_PRECEDENCE`，等于int类型最大值`Integer.MAX_VALUE`。
 
-<font color=#FF0000 >JanusPlugin的优先级，大于0的表示会在事务回滚前执行，可以查询事务内的数据；小于0的表示会在事务回滚后执行。优先级不可以等于0。只有选择`SYNC_ROLLBACK_ONE_COMPARE`或者`SYNC_ROLLBACK_ALL_COMPARE`模式才会有事务。</font>
+> [!IMPORTANT]
+> JanusPlugin的优先级，大于0的表示会在事务回滚前执行，可以查询事务内的数据；小于0的表示会在事务回滚后执行。优先级不可以等于0。只有选择`SYNC_ROLLBACK_ONE_COMPARE`或者`SYNC_ROLLBACK_ALL_COMPARE`模式才会有事务。
 
 插件默认优先级为最高优先级，最先进入，最后结束。
 
