@@ -264,14 +264,16 @@ public class JanusRollbackClearCacheImpl implements JanusRollbackClearCache {
 
 可以[自己注入该线程池](#jump-target-custom)，名字一样（必须使用`janusBranchThreadPool`这个名字）即可替换框架提供的线程池。
 
+注意，由于默认开启了[流量均衡](#jump-target-balancing)，`janusBranchThreadPool`默认设置`core-pool-size`等于`maximum-pool-size`。如果`maximum-pool-size`比`core-pool-size`大，很容易因为[流量均衡](#jump-target-balancing)功能导致线程池一直无法将线程数增加到`maximum-pool-size`。
+
 也可以通过配置项来自定义框架提供的线程池的配置：
 
 ```yml
 janus:
   janus-branch-thread-pool:
-    # 核心线程数
-    core-pool-size: 10
-    # 最大线程数
+    # 核心线程数，默认16
+    core-pool-size: 20
+    # 最大线程数，默认16
     maximum-pool-size: 20
     # 线程存活时间
     keep-alive-time: 60
@@ -300,10 +302,10 @@ janus:
 ```yml
 janus:
   janus-compare-thread-pool:
-    # 核心线程数
-    core-pool-size: 5
-    # 最大线程数
-    maximum-pool-size: 10
+    # 核心线程数，默认3
+    core-pool-size: 2
+    # 最大线程数，默认5
+    maximum-pool-size: 4
     # 线程存活时间
     keep-alive-time: 30
     # 时间单位 (可选值: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS)
@@ -345,7 +347,9 @@ public class TestDTO {
 }
 ```
 
-### 异步比对场景中，自动平衡每个方法的流量
+### <span id="jump-target-balancing">`ASYNC_COMPARE`的流量均衡</span>
+
+比对类型为`ASYNC_COMPARE`表示使用`janusBranchThreadPool`线程池异步执行比对分支，流量较高时该线程池会面临巨大压力。所以该线程池的默认拒绝策略为`DiscardOldestPolicy`。这样会导致一个严重的隐患，如果某些选择了`ASYNC_COMPARE`的方法运行时间很长或者流量巨大，会导致其他方法都无法正常运行。
 
 执行比对分支`compareBranch`的线程池`janusBranchThreadPool`的队列被占用到一定比例时，会触发流量自动平衡功能，限制当前流量高的方法的比对流量(不影响它们的主分支的运行，仅丢弃比对任务)。
 
@@ -623,3 +627,17 @@ Janus框架面对的使用场景，非常容易遇到根据当前业务进行功
 ### 依赖Jackson框架实现分支结果比对
 
 `JanusJsonUtils`类中实现了对Json格式字符串或者Java对象的比对功能，依赖Jackson框架。支持忽略指定字段。
+
+### 流量均衡功能
+
+要实现[流量均衡](#jump-target-balancing)功能，必须判断以下2点：
+
+1. 线程池压力是否过大。线程池压力不大无需限流。
+   - 实现方式：通过判断线程池队列当前占用比例来判断线程池当前的压力。
+   - 详情见`JanusAspect`的`isHighPressure()`方法。
+2. 当前方法占用线程池是否过高。如果当前方法对线程池的占用等于或者超过平均值，判定为当前方法占用线程池太多，需要限流。
+   - 实现方式：使用一个全局唯一的`ConcurrentHashMap`来记录每个方法对线程池的占用情况。该记录是动态的，每次切面进入，对应的方法+1；每次切面中的异步执行比对分支的操作结束，对应的方法-1。只要判断线程池压力过大，则先通过该map来计算当前所有方法的平均流量，然后获取当前方法的流量进行比较。注意，只要当前方法的流量**大于等于**平均流量即可判定需要限流，这样做可以避免只有1个方法有流量时无法触发限流的问题。
+   - 详情见`JanusAspect`的`shouldThrottle(Method method)`方法。
+
+
+
