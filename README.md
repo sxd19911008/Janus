@@ -665,5 +665,62 @@ Janus框架面对的使用场景，非常容易遇到根据当前业务进行功
    - 实现方式：使用一个全局唯一的`ConcurrentHashMap`来记录每个方法对线程池的占用情况。该记录是动态的，每次切面进入，对应的方法+1；每次切面中的异步执行比对分支的操作结束，对应的方法-1。只要判断线程池压力过大，则先通过该map来计算当前所有方法的平均流量，然后获取当前方法的流量进行比较。注意，只要当前方法的流量**大于等于**平均流量即可判定需要限流，这样做可以避免只有1个方法有流量时无法触发限流的问题。
    - 详情见`JanusAspect`的`shouldThrottle(Method method)`方法。
 
+### 流程图
 
+```mermaid
+graph TD
+    A([AOP 切面拦截 @Janus 方法]) --> B{全局开关是否关闭?}
+    
+    B -- 是 --> C[直接执行原方法 joinPoint.proceed]
+    C --> Z([返回结果, 流程结束])
+    
+    B -- 否 --> D[解析注解并构建上下文 JanusContext<br/>提取插件、比对类型、业务主键等]
+    
+    D --> E[触发插件生命周期: switchBranch]
+    E --> F[当前方法流量计数 +1 <br/>用于防雪崩及限流判断]
+    
+    F --> G{比对类型是否包含<br/>回滚语义 Rollback?}
+    
+    G -- 是 --> H[开启 Spring 事务 transactionTemplate]
+    H --> I[先执行比对分支代码 compareBranch]
+    I --> J[后执行主分支代码 masterBranch]
+    J --> K[提交或标记回滚事务]
+    K --> M[进入比对处理阶段 handleCompare]
+    
+    G -- 否 --> L[仅在主线程执行主分支代码 masterBranch]
+    L --> M
+    
+    M --> N{判断比对类型 CompareType}
+    
+    N -- ASYNC_COMPARE --> O{是否触发高压限流?}
+    O -- 是 --> P[丢弃比对任务, 流量计数 -1]
+    O -- 否 --> Q[投递到异步线程池:<br/>执行比对分支并比对结果]
+    P --> U
+    Q --> U
+    
+    N -- SYNC_COMPARE --> R[当前线程同步执行:<br/>执行比对分支并比对结果]
+    R --> U
+    
+    N -- SYNC_ROLLBACK_* --> S[直接比对两分支结果<br/>比对分支已在上方事务中执行]
+    S --> U
+    
+    N -- DO_NOT_COMPARE --> T[跳过比对操作]
+    T --> U
+    
+    U{主分支执行是否抛出异常?}
+    U -- 是 --> V[向外抛出主分支异常]
+    U -- 否 --> W[返回主分支正常结果]
+    
+    V --> Z
+    W --> Z
+    
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:1px;
+    classDef process fill:#e1f5fe,stroke:#03a9f4,stroke-width:1px;
+    classDef decision fill:#fff3e0,stroke:#ff9800,stroke-width:1px;
+    classDef terminator fill:#e8eaf6,stroke:#3f51b5,stroke-width:1px;
+    
+    class A,Z terminator;
+    class B,G,N,O,U decision;
+    class C,D,E,F,H,I,J,K,L,M,P,Q,R,S,T,V,W process;
+```
 
