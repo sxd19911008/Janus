@@ -16,8 +16,6 @@ public interface JanusContext {
 
     Object[] getArgs();
 
-    void putPluginData(Class<?> clazz, Object data);
-
     Boolean isCompare();
 
     Boolean isNotCompare();

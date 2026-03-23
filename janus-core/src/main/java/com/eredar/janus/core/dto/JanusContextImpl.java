@@ -145,7 +145,6 @@ public class JanusContextImpl implements JanusContext {
         return this.pluginDataMap.get(clazz);
     }
 
-    @Override
     public void putPluginData(Class<?> clazz, Object data) {
         this.pluginDataMap.put(clazz, data);
     }

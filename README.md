@@ -633,8 +633,46 @@ public class ThreadPoolConfig {
 JanusContextImpl janusContextImpl = (JanusContextImpl) context;
 ```
 
-下面仅介绍`JanusContext`接口相关API。
+### JanusContext接口相关API
 
+| 方法签名 | 返回值类型 | 功能描述 |
+| :--- | :--- | :--- |
+| `getMethodId()` | `String` | 获取方法的唯一标识 |
+| `getBusinessKey()` | `String` | 获取业务主键 |
+| `getCompareType()` | `CompareType` | 获取比对类型 |
+| `getArgs()` | `Object[]` | 获取方法入参 |
+| `isCompare()` | `Boolean` | 是否比对 |
+| `isNotCompare()` | `Boolean` | 是否不比对 |
+| `setIsCompare(Boolean isCompare)` | `void` | 设置是否比对 |
+| `isAsyncCompare()` | `Boolean` | 是否异步比对 |
+| `getMasterBranchName()` | `String` | 获取主分支名称 |
+| `getPrimaryBranch()` | `BranchInfo` | 获取primary分支 |
+| `getSecondaryBranch()` | `BranchInfo` | 获取secondary分支 |
+| `getMasterBranch()` | `BranchInfo` | 获取主分支 |
+| `getCompareBranch()` | `BranchInfo` | 获取比对分支 |
+| `setPrimaryQueryRes(Object queryRes)` | `void` | 设置primary分支的查询结果 |
+| `setSecondaryQueryRes(Object queryRes)` | `void` | 设置secondary分支的查询结果 |
+| `getCompareRes()` | `CompareRes` | 获取比对结果 |
+| `setMasterBranchName(String masterBranchName)` | `void` | 设置主分支名称 |
+| `getIgnoreFieldPaths()` | `Set<String>` | 获取比对时需要忽略的字段路径集合 |
+| `getAnnotation(Class<T> annotationClass)` | `<T extends Annotation> T` | 获取自定义注解 |
+| `getPrimaryTime()` | `Long` | 获取primary分支的执行耗时（纳秒） |
+| `getSecondaryTime()` | `Long` | 获取secondary分支的执行耗时（纳秒） |
+| `getOtherPluginData(Class<? extends AbstractDataJanusPlugin<OTH>> pluginClass)` | `<OTH> OTH` | 获取其他插件的数据 |
+
+###  自定义注解
+
+允许开发者自定义注解，与`@Janus`一起添加在方法上。配合自定义插件可以实现各种扩展功能。
+
+在自定义插件中，可以用如下方式获取自定义注解的信息：
+
+```java
+@Override
+public void switchBranch(JanusContext context) {
+    TestAnnotation annotation = context.getAnnotation(TestAnnotation.class);
+    // ......
+}
+```
 
 
 ## 日志打印
