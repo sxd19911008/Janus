@@ -655,12 +655,12 @@ JanusContextImpl janusContextImpl = (JanusContextImpl) context;
 | `getCompareRes()` | `CompareRes` | 获取比对结果 |
 | `setMasterBranchName(String masterBranchName)` | `void` | 设置主分支名称 |
 | `getIgnoreFieldPaths()` | `Set<String>` | 获取比对时需要忽略的字段路径集合 |
-| `getAnnotation(Class<T> annotationClass)` | `<T extends Annotation> T` | 获取自定义注解 |
+| `getAnnotation(Class<T> annotationClass)` | `<T extends Annotation> T` | 获取[自定义注解](#自定义注解) |
 | `getPrimaryTime()` | `Long` | 获取primary分支的执行耗时（纳秒） |
 | `getSecondaryTime()` | `Long` | 获取secondary分支的执行耗时（纳秒） |
 | `getOtherPluginData(Class<? extends AbstractDataJanusPlugin<OTH>> pluginClass)` | `<OTH> OTH` | 获取其他插件的数据 |
 
-###  自定义注解
+### 自定义注解
 
 允许开发者自定义注解，与`@Janus`一起添加在方法上。配合自定义插件可以实现各种扩展功能。
 
