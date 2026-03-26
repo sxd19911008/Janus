@@ -579,6 +579,20 @@ public class GlobalJanusPlugin implements JanusPlugin {
 }
 ```
 
+## JanusAspect切面执行后获取信息
+
+通过`JanusAspectSupport`可以在JanusAspect切面执行后获取信息，目前仅支持获取`masterBranchName`。有以下三个结果：
+
+- `primary`: primary分支
+- `secondary`: secondary分支
+- `null`: 表示没有分流结果，有可能Janus功能被关闭，有可能不是在本线程执行的Janus功能，也有可能添加了`@Janus`注解的方法尚未执行。
+
+由于一条链路上可能有多个添加了`@Janus`注解的方法，所以获取该信息必须指定`methodId`，示例：
+
+```java
+String masterBranchName = JanusAspectSupport.getMasterBranchName("methodId");
+```
+
 ## 允许开发者自定义的功能
 
 以下功能都提供了接口，并且框架提供的Bean都设置了`@ConditionalOnMissingBean`，允许开发者根据需要自己定义这些功能。
