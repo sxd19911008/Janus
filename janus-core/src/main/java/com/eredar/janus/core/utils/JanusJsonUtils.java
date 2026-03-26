@@ -1,12 +1,14 @@
 package com.eredar.janus.core.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import lombok.SneakyThrows;
@@ -90,8 +92,8 @@ public class JanusJsonUtils {
      * @param expect 期望对象
      * @return 差异Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
      */
-    public static Map<String, String> compareObj(Object actual, Object expect) {
-        return compareObj(actual, expect, null);
+    public static Map<String, String> compare(Object actual, Object expect) {
+        return compare(actual, expect, null);
     }
 
     /**
@@ -102,61 +104,52 @@ public class JanusJsonUtils {
      * @param ignoreFieldPaths 忽略的字段路径集合
      * @return 差异Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
      */
-    public static Map<String, String> compareObj(Object actual, Object expect, Set<String> ignoreFieldPaths) {
-        if (actual instanceof String && expect instanceof String) {
-            return compareJson((String) actual, (String) expect, ignoreFieldPaths);
-        }
-        JsonNode actualNode = ob.valueToTree(actual);
-        JsonNode expectNode = ob.valueToTree(expect);
+    public static Map<String, String> compare(Object actual, Object expect, Set<String> ignoreFieldPaths) {
+        JsonNode actualNode = toJsonNode(actual);
+        JsonNode expectNode = toJsonNode(expect);
         Map<String, String> diffMap = new LinkedHashMap<>();
+        if (actualNode.isNull() && expectNode.isNull()) {
+            diffMap.put("", NULL + SEPARATOR + NULL);
+            return diffMap;
+        }
         compareNodes("", actualNode, expectNode, diffMap, ignoreFieldPaths);
         return diffMap;
     }
 
-    /**
-     * 比对两个 Json 字符串
-     *
-     * @param actual 实际 Json 串
-     * @param expect 期望 Json 串
-     * @return 差异 Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
-     */
-    public static Map<String, String> compareJson(String actual, String expect) {
-        return compareJson(actual, expect, null);
-    }
-
-    /**
-     * 比对两个 Json 字符串，支持忽略指定路径
-     *
-     * @param actual           实际 Json 串
-     * @param expect           期望 Json 串
-     * @param ignoreFieldPaths 忽略的字段路径集合
-     * @return 差异 Map，Key 为路径，Value 为差异描述。如果 Map 为空表示一致。
-     */
-    public static Map<String, String> compareJson(String actual, String expect, Set<String> ignoreFieldPaths) {
-        Map<String, String> diffMap = new LinkedHashMap<>();
-        if (isNotBlank(actual) && isNotBlank(expect)) {
-            try {
-                JsonNode actualNode = ob.readTree(actual);
-                JsonNode expectNode = ob.readTree(expect);
-                // 开始递归比对
-                compareNodes("", actualNode, expectNode, diffMap, ignoreFieldPaths);
-            } catch (Throwable e) {
-                throw new RuntimeException("Jackson 比对异常", e);
-            }
-            return diffMap;
-        } else if (isBlank(actual) && isBlank(expect)) {
-            diffMap.put("", NULL + SEPARATOR + NULL);
-            return diffMap;
-        } else if (isNotBlank(actual)) {
-            diffMap.put("", NOT_NULL + SEPARATOR + NULL);
-            return diffMap;
-        } else {
-            diffMap.put("", NULL + SEPARATOR + NOT_NULL);
-            return diffMap;
-        }
-    }
-
     /* ---------------- Internal Logic ---------------- */
+
+    /**
+     * 将未知类型对象解析成 JsonNode
+     *
+     * @param object 目标对象，可能为null或者非Json字符串等各种情况
+     * @return JsonNode
+     */
+    private static JsonNode toJsonNode(Object object) {
+        JsonNode jsonNode;
+        if (object == null) {
+            // 设置为 null 节点
+            jsonNode = NullNode.getInstance();
+        } else if (object instanceof String) {
+            String objStr = String.valueOf(object);
+            if (isBlank(objStr)) {
+                // 设置为 null 节点
+                jsonNode = NullNode.getInstance();
+            } else {
+                try {
+                    // 当作 Json 字符串解析
+                    jsonNode = ob.readTree(objStr);
+                } catch (JsonProcessingException e) {
+                    // 报错说明不是 Json 格式字符串，直接解析成 TextNode
+                    jsonNode = ob.valueToTree(object);
+                }
+            }
+        } else {
+            // 解析成其他节点
+            jsonNode = ob.valueToTree(object);
+        }
+
+        return jsonNode;
+    }
 
     /**
      * 递归比对节点

@@ -727,7 +727,7 @@ Janus框架面对的使用场景，非常容易遇到根据当前业务进行功
 
 ### 依赖Jackson框架实现分支结果比对
 
-`JanusJsonUtils`类中实现了对Json格式字符串或者Java对象的比对功能，依赖Jackson框架。支持忽略指定字段。
+`JanusJsonUtils`类中`compare`方法，实现了对Json格式字符串或者Java对象的比对功能，依赖Jackson框架。支持忽略指定字段。
 
 ### 流量均衡功能
 

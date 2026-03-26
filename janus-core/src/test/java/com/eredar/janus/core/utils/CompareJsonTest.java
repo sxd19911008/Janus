@@ -83,7 +83,7 @@ public class CompareJsonTest {
     @MethodSource("testCompareJsonDataProvider")
     public void testCompareJson(String actualJson, String expectJson, Set<String> ignoreFieldPaths, String expectedStr) {
         // 测试比对
-        Map<String, String> actualMap = JanusJsonUtils.compareJson(actualJson, expectJson, ignoreFieldPaths);
+        Map<String, String> actualMap = JanusJsonUtils.compare(actualJson, expectJson, ignoreFieldPaths);
         System.out.println("比对结果 Map=" + JanusJsonUtils.writeValueAsString(actualMap));
 
         // 解析预期结果
@@ -107,7 +107,7 @@ public class CompareJsonTest {
                         null,
                         null,
                         null,
-                        "{}"
+                        "{\"\":\"null / null\"}"
                 ),
                 Arguments.of(
                         null,
@@ -150,7 +150,7 @@ public class CompareJsonTest {
     @MethodSource("testCompareObjDataProvider")
     public void testCompareObj(String actualJson, String expectJson, Set<String> ignoreFieldPaths, String expectedStr) {
         // 测试比对
-        Map<String, String> actualMap = JanusJsonUtils.compareObj(this.stringToMap(actualJson), this.stringToMap(expectJson), ignoreFieldPaths);
+        Map<String, String> actualMap = JanusJsonUtils.compare(this.stringToMap(actualJson), this.stringToMap(expectJson), ignoreFieldPaths);
         System.out.println("比对结果 Map=" + JanusJsonUtils.writeValueAsString(actualMap));
 
         // 解析预期结果

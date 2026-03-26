@@ -4,12 +4,11 @@ package com.eredar.janus.core.compare;
 import com.eredar.janus.core.constants.JanusConstants;
 import com.eredar.janus.core.dto.BranchInfo;
 import com.eredar.janus.core.dto.CompareRes;
-import com.eredar.janus.core.utils.JanusUtils;
+import com.eredar.janus.core.dto.JanusContext;
 import com.eredar.janus.core.utils.JanusJsonUtils;
+import com.eredar.janus.core.utils.JanusUtils;
 
 import java.util.Map;
-
-import com.eredar.janus.core.dto.JanusContext;
 
 /**
  * Janus 比对功能默认实现
@@ -33,7 +32,7 @@ public class JanusCompareDefaultImpl implements JanusCompare {
             }
         } else {
             // 无异常，比对具体的数据
-            Map<String, String> diffFieldMap = JanusJsonUtils.compareObj(
+            Map<String, String> diffFieldMap = JanusJsonUtils.compare(
                     primaryBranch.getBranchRes(),
                     secondaryBranch.getBranchRes(),
                     context.getIgnoreFieldPaths()

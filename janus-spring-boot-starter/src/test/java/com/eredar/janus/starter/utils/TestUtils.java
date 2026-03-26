@@ -8,7 +8,7 @@ import java.util.Map;
 public class TestUtils {
 
     public static void assertEquals(Object actual, Object expected) {
-        Map<String, String> compareResMap = JanusJsonUtils.compareObj(actual, expected);
+        Map<String, String> compareResMap = JanusJsonUtils.compare(actual, expected);
         if (!compareResMap.isEmpty()) {
             Assertions.fail(JanusJsonUtils.writeValueAsString(compareResMap));
         }
