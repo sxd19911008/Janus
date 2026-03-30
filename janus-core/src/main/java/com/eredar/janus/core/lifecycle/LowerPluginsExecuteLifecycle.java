@@ -11,7 +11,6 @@ import java.util.List;
  * <P>1. 作为装饰类，增强的功能为：在正确的生命周期节点执行配置的插件。
  * <P>2. 仅执行优先级大于0的插件。
  */
-@Component
 public class LowerPluginsExecuteLifecycle extends LifecycleDecorator {
 
     @Override

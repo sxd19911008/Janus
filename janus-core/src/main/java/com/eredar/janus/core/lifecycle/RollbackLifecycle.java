@@ -5,7 +5,6 @@ import com.eredar.janus.core.rollback.JanusRollback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
 public class RollbackLifecycle extends LifecycleDecorator {
 
     @Autowired

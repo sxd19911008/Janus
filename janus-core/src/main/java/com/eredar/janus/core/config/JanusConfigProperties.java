@@ -3,13 +3,11 @@ package com.eredar.janus.core.config;
 import com.eredar.janus.core.constants.CompareType;
 import com.eredar.janus.core.constants.JanusConstants;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-@ConfigurationProperties(prefix = "janus")
 @Data
 public class JanusConfigProperties {
 

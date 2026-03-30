@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Janus SpEL 表达式求值器。
  */
-@Component
 public class JanusExpressionEvaluator extends CachedExpressionEvaluator {
 
     /**

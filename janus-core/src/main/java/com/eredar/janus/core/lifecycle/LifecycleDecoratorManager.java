@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
  * 用于组合组合所有生命周期，并且注入{@link JanusAspect}
  * <p>注意，该类不可添加任何额外功能，仅用于组合装饰模式的所有实现
  */
-@Component
 public class LifecycleDecoratorManager extends LifecycleDecorator {
 
     @Autowired

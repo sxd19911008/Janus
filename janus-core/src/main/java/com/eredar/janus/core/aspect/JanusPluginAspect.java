@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
  * <p>2. 可以防止插件等附加功能之间互相影响
  */
 @Slf4j
-@Component
 @Aspect
 public class JanusPluginAspect {
 

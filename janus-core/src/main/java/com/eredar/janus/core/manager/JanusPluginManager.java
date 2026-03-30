@@ -7,12 +7,7 @@ import com.eredar.janus.core.utils.JanusAopUtils;
 import com.eredar.janus.core.utils.JanusLogUtils;
 import com.eredar.janus.core.utils.JanusUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,20 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component
-public class JanusPluginManager implements ApplicationRunner {
+public class JanusPluginManager {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final Map<Class<? extends JanusPlugin>, JanusPlugin> globalPluginMap;
+    private final Map<Class<? extends JanusPlugin>, JanusPlugin> methodPluginMap;
 
-    private final Map<Class<? extends JanusPlugin>, JanusPlugin> globalPluginMap = new HashMap<>();
-    private final Map<Class<? extends JanusPlugin>, JanusPlugin> methodPluginMap = new HashMap<>();
-
-    @Override
-    public void run(ApplicationArguments args) {
-        Map<String, JanusPlugin> beanMap = applicationContext.getBeansOfType(JanusPlugin.class);
-        if (JanusUtils.isNotEmpty(beanMap)) {
-            for (JanusPlugin plugin : beanMap.values()) {
+    public JanusPluginManager(List<JanusPlugin> janusPluginList) {
+        this.globalPluginMap = new HashMap<>();
+        this.methodPluginMap = new HashMap<>();
+        if (JanusUtils.isNotEmpty(janusPluginList)) {
+            for (JanusPlugin plugin : janusPluginList) {
                 // 防止有动态代理类导致无法获取正确的class，先获取原始的bean对象
                 JanusPlugin target = (JanusPlugin) JanusAopUtils.getProxyTarget(plugin);
                 // bean 类型

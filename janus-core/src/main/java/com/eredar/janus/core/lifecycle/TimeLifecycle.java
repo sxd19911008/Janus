@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
  * 统计分支耗时，精确到纳秒
  */
 @Slf4j
-@Component
 public class TimeLifecycle extends LifecycleDecorator {
 
     @Override

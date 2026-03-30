@@ -40,13 +40,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- 自动装配与配置属性支持：@ConfigurationProperties 等 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- 日志框架 -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -73,14 +66,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- 让 IDE 识别 @ConfigurationProperties 元数据 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <!-- Spring 官方推荐 optional=true，是编译时生成元数据的工具 -->
             <optional>true</optional>
         </dependency>
 

@@ -4,28 +4,22 @@ import com.eredar.janus.core.compare.JanusCompare;
 import com.eredar.janus.core.exception.JanusException;
 import com.eredar.janus.core.utils.JanusAopUtils;
 import com.eredar.janus.core.utils.JanusUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@Component
-public class JanusCompareManager implements ApplicationRunner {
+/**
+ * 统一管理所有 自定义比对实现
+ */
+public class JanusCompareManager {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final Map<Class<? extends JanusCompare>, JanusCompare> map;
 
-    private final Map<Class<? extends JanusCompare>, JanusCompare> map = new HashMap<>();
-
-    @Override
-    public void run(ApplicationArguments args) {
-        Map<String, JanusCompare> beanMap = applicationContext.getBeansOfType(JanusCompare.class);
-        if (JanusUtils.isNotEmpty(beanMap)) {
-            for (JanusCompare janusCompare : beanMap.values()) {
+    public JanusCompareManager(List<JanusCompare> compareList) {
+        this.map = new HashMap<>();
+        if (JanusUtils.isNotEmpty(compareList)) {
+            for (JanusCompare janusCompare : compareList) {
                 // 防止有动态代理类导致无法获取正确的class，先获取原始的bean对象
                 JanusCompare target = (JanusCompare) JanusAopUtils.getProxyTarget(janusCompare);
                 // bean 类型

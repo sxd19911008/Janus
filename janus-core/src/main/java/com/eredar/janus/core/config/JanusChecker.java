@@ -9,7 +9,6 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.util.HashSet;
@@ -20,7 +19,6 @@ import java.util.Set;
  * <p>1. methodId 是否重复
  * <p>2. 存在事务相关的比对类型(CompareType)，必须实现`JanusRollbackClearCache`
  */
-@Component
 public class JanusChecker implements SmartInitializingSingleton {
 
     @Autowired
