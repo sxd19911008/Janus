@@ -2,7 +2,6 @@ package com.eredar.janus.core.lifecycle;
 
 import com.eredar.janus.core.dto.JanusContextImpl;
 import com.eredar.janus.core.plugin.JanusPlugin;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 

@@ -3,7 +3,6 @@ package com.eredar.janus.core.lifecycle;
 import com.eredar.janus.core.aspect.JanusAspect;
 import com.eredar.janus.core.dto.JanusContextImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 

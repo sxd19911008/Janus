@@ -3,7 +3,6 @@ package com.eredar.janus.core.lifecycle;
 import com.eredar.janus.core.dto.JanusContextImpl;
 import com.eredar.janus.core.rollback.JanusRollback;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 public class RollbackLifecycle extends LifecycleDecorator {
 

@@ -4,7 +4,6 @@ import com.eredar.janus.core.config.JanusConfigProperties;
 import com.eredar.janus.core.utils.JanusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;

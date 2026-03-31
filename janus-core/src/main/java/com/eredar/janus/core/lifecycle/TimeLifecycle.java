@@ -3,7 +3,6 @@ package com.eredar.janus.core.lifecycle;
 import com.eredar.janus.core.dto.JanusContextImpl;
 import com.eredar.janus.core.utils.JanusLogUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * 统计分支耗时，精确到纳秒
