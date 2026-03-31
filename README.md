@@ -373,6 +373,72 @@ public class TestDTO {
 }
 ```
 
+### 自定义比对逻辑
+
+如果默认的比对逻辑无法满足某个方法的比对需求，允许开发者通过实现`JanusCompare`接口自己定义比对逻辑（一定要添加`@Component`注解注入Spring），并通过`@Janus`注解`compareImpl`属性进行设置。
+
+`compareImpl`属性默认为`JanusCompareDefaultImpl.class`，由Janus框架提供。默认实现可以满足大多数场景。
+
+新建自定义比对实现：
+
+```java
+@Component
+public class MyJanusCompare implements JanusCompare {
+
+    @Override
+    public CompareRes compare(JanusContext context) {
+        // 获取分支信息
+        BranchInfo primaryBranch = context.getPrimaryBranch();
+        BranchInfo secondaryBranch = context.getSecondaryBranch();
+
+        CompareRes compareRes = new CompareRes();
+        /*
+         * 该API可以检查分支是否异常
+         * primaryBranch.isError()
+         *
+         * 自定义逻辑，判断运行结果是否异常，设置对应的 compareStatus
+         * compareRes.setCompareStatus(JanusConstants.ALL_ERROR);
+         * compareRes.setCompareStatus(JanusConstants.PRIMARY_ERROR);
+         * compareRes.setCompareStatus(JanusConstants.SECONDARY_ERROR);
+         */
+
+        /*
+         * 该API可以获取运行结果，包括落表信息
+         * primaryBranch.getBranchRes()
+         * 该API可以获取想要忽略的字段
+         * context.getIgnoreFieldPaths()
+         * 
+         * 运行结果无异常，则自定义比对逻辑
+         * 比对通过设置 compareStatus 为 SUCCESS
+         * compareRes.setCompareStatus(JanusConstants.SUCCESS);
+         * 比对不通过设置 compareStatus 为 DIFFERENT
+         * compareRes.setCompareStatus(JanusConstants.DIFFERENT);
+         * 创建一个map存入不通过的字段，放入 diffFieldMap
+         * compareRes.setDiffFieldMap(diffFieldMap);
+         */
+
+        // 返回比对结果
+        return compareRes;
+    }
+}
+```
+
+配置在`@Janus`注解`compareImpl`属性：
+
+```java
+@Janus(
+        methodId = "testMethod",
+        businessKey = "#request.key",
+        compareType = CompareType.ASYNC_COMPARE,
+        compareImpl = MyJanusCompare.class
+        ignoreFieldPaths = {"res.str1", "res.list.str2"}
+)
+@Override
+public TestResponse testMethod(TestRequest request) {
+    // ......
+}
+```
+
 ### 流量均衡
 
 比对模式为`ASYNC_COMPARE`表示使用`janusBranchThreadPool`线程池异步执行比对分支，流量较高时该线程池会面临巨大压力。所以该线程池的默认拒绝策略为`DiscardOldestPolicy`。这样会导致一个严重的隐患，如果某些选择了`ASYNC_COMPARE`的方法运行时间很长或者流量巨大，会导致其他方法都无法正常运行。
@@ -599,7 +665,6 @@ String masterBranchName = JanusAspectSupport.getMasterBranchName("methodId");
 
 一般情况下使用Janus框架的默认实现即可。
 
-- `JanusCompare`接口：实现该接口可以自己定义比对功能。
 - `JanusRollback`接口：实现该接口可以自己定义事务回滚功能。
 - `janusBranchThreadPoolMetricsProvider`接口：如果开发者使用了自己定义的线程池，并且线程池的实现不是`ThreadPoolExecutor`类型，则需要开发者自己实现该接口，用来提供线程池的队列的相关数据。该接口有2个抽象方法，`getQueueSize()`方法用于获取线程池队列信息当前的size；`getQueueCapacity()`方法用于获取线程池队列的最大容量（可以不用很精确）。
 
