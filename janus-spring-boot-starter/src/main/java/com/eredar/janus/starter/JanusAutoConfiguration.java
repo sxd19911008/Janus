@@ -28,11 +28,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class JanusAutoConfiguration {
 
-    /**
-     * 第一步：接收配置并组装 Core 包的对象
-     * * Spring 会拦截这个 Bean 的创建，读取 application.yml 中以 "janus" 开头的配置，
-     * 并通过反射调用 JanusConfigProperties 的 setter 方法完成组装。
-     */
     @Bean
     @ConfigurationProperties(prefix = "janus")
     public JanusConfigProperties janusConfigProperties() {
