@@ -1,7 +1,7 @@
 package com.eredar.janus.core.config;
 
 import com.eredar.janus.core.annotation.Janus;
-import com.eredar.janus.core.constants.CompareType;
+import com.eredar.janus.core.constants.JanusCompareType;
 import com.eredar.janus.core.exception.JanusException;
 import com.eredar.janus.core.rollback.JanusRollbackClearCache;
 import com.eredar.janus.core.utils.JanusAopUtils;
@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * 校验 @Janus 注解中的配置是否合法
  * <p>1. methodId 是否重复
- * <p>2. 存在事务相关的比对类型(CompareType)，必须实现`JanusRollbackClearCache`
+ * <p>2. 存在事务相关的比对类型(JanusCompareType)，必须实现`JanusRollbackClearCache`
  */
 public class JanusChecker implements SmartInitializingSingleton {
 
@@ -65,8 +65,8 @@ public class JanusChecker implements SmartInitializingSingleton {
                     }
 
                     /* 是否存在事务相关的比对类型 */
-                    CompareType compareType = annotation.compareType();
-                    if (!hasRollback[0] && CompareType.hasRollback(compareType)) {
+                    String compareType = annotation.compareType();
+                    if (!hasRollback[0] && JanusCompareType.hasRollback(compareType)) {
                         hasRollback[0] = true;
                     }
                 }

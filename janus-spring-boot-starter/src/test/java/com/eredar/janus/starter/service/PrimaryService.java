@@ -1,7 +1,7 @@
 package com.eredar.janus.starter.service;
 
 import com.eredar.janus.core.annotation.Janus;
-import com.eredar.janus.core.constants.CompareType;
+import com.eredar.janus.core.constants.JanusCompareType;
 import com.eredar.janus.core.constants.JanusConstants;
 import com.eredar.janus.starter.annotation.TestAnnotation;
 import com.eredar.janus.starter.dao.TestRollbackMapper;
@@ -31,7 +31,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testAsyncCompare1",
-            compareType = CompareType.ASYNC_COMPARE,
+            compareType = JanusCompareType.ASYNC_COMPARE,
             businessKey = "#request.key",
             plugins = {AsyncSwitchJanusPlugin.class, CountCompareJanusPlugin.class}
     )
@@ -44,7 +44,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testAsyncCompare2",
-            compareType = CompareType.ASYNC_COMPARE,
+            compareType = JanusCompareType.ASYNC_COMPARE,
             businessKey = "#request.key",
             plugins = {AsyncSwitchJanusPlugin.class, AsyncResJanusPlugin.class}
     )
@@ -57,7 +57,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testSyncCompare",
-            compareType = CompareType.SYNC_COMPARE,
+            compareType = JanusCompareType.SYNC_COMPARE,
             isAsyncCompare = false,
             businessKey = "buildKey(#request.key, 'qqq')",
             plugins = {SwitchJanusPlugin.class, TestAnnotationJanusPlugin.class, ExecuteTimeJanusPlugin.class}
@@ -86,7 +86,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testRollbackOne",
-            compareType = CompareType.SYNC_ROLLBACK_ONE_COMPARE,
+            compareType = JanusCompareType.SYNC_ROLLBACK_ONE_COMPARE,
             isAsyncCompare = false,
             businessKey = "#request.key",
             plugins = {TestRollbackQueryDataJanusPlugin.class, ExecuteTimeJanusPlugin.class}
@@ -140,7 +140,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testRollbackAll",
-            compareType = CompareType.SYNC_ROLLBACK_ALL_COMPARE,
+            compareType = JanusCompareType.SYNC_ROLLBACK_ALL_COMPARE,
             isAsyncCompare = false,
             businessKey = "#request.key",
             plugins = {TestRollbackQueryDataJanusPlugin.class, ExecuteTimeJanusPlugin.class}
@@ -194,7 +194,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "testIgnore",
-            compareType = CompareType.SYNC_COMPARE,
+            compareType = JanusCompareType.SYNC_COMPARE,
             isAsyncCompare = false,
             plugins = ExecuteTimeJanusPlugin.class,
             ignoreFieldPaths = {"res.ignoreStr1", "res.ignoreList.str2"}
@@ -217,7 +217,7 @@ public class PrimaryService implements TestInterface {
      */
     @Janus(
             methodId = "testCompareThrottling",
-            compareType = CompareType.SYNC_COMPARE,
+            compareType = JanusCompareType.SYNC_COMPARE,
             isAsyncCompare = false,
             plugins = {CompareThrottlingJanusPlugin.class, CountCompare2JanusPlugin.class}
     )
@@ -228,7 +228,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "janusAspectStatus1",
-            compareType = CompareType.ASYNC_COMPARE,
+            compareType = JanusCompareType.ASYNC_COMPARE,
             businessKey = "#request.key",
             plugins = AsyncSwitchJanusPlugin.class
     )
@@ -248,7 +248,7 @@ public class PrimaryService implements TestInterface {
 
     @Janus(
             methodId = "janusAspectStatus2",
-            compareType = CompareType.ASYNC_COMPARE,
+            compareType = JanusCompareType.ASYNC_COMPARE,
             businessKey = "#request.key",
             plugins = AsyncSwitchJanusPlugin.class
     )

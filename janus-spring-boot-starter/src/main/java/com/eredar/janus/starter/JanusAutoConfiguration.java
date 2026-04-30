@@ -7,8 +7,11 @@ import com.eredar.janus.core.compare.JanusCompareDefaultImpl;
 import com.eredar.janus.core.config.JanusChecker;
 import com.eredar.janus.core.config.JanusConfigProperties;
 import com.eredar.janus.core.config.JanusExpressionEvaluator;
+import com.eredar.janus.core.flow.JanusFlow;
+import com.eredar.janus.core.flow.impl.*;
 import com.eredar.janus.core.lifecycle.*;
 import com.eredar.janus.core.manager.JanusCompareManager;
+import com.eredar.janus.core.manager.JanusFlowManager;
 import com.eredar.janus.core.manager.JanusPluginManager;
 import com.eredar.janus.core.plugin.JanusPlugin;
 import com.eredar.janus.core.rollback.JanusRollback;
@@ -129,6 +132,11 @@ public class JanusAutoConfiguration {
     }
 
     @Bean
+    public JanusFlowManager janusFlowManager(List<JanusFlow> janusFlowList, JanusConfigProperties janusConfigProperties) {
+        return new JanusFlowManager(janusFlowList, janusConfigProperties);
+    }
+
+    @Bean
     public JanusExpressionEvaluator janusExpressionEvaluator() {
         return new JanusExpressionEvaluator();
     }
@@ -136,5 +144,30 @@ public class JanusAutoConfiguration {
     @Bean
     public JanusChecker janusChecker() {
         return new JanusChecker();
+    }
+
+    @Bean
+    public JanusFlow asyncJanusFlow() {
+        return new AsyncCompareJanusFlow();
+    }
+
+    @Bean
+    public JanusFlow doNotJanusFlow() {
+        return new DoNotCompareJanusFlow();
+    }
+
+    @Bean
+    public JanusFlow syncJanusFlow() {
+        return new SyncCompareJanusFlow();
+    }
+
+    @Bean
+    public JanusFlow syncRollbackAllJanusFlow() {
+        return new SyncRollbackAllCompareJanusFlow();
+    }
+
+    @Bean
+    public JanusFlow syncRollbackOneJanusFlow() {
+        return new SyncRollbackOneCompareJanusFlow();
     }
 }

@@ -1,6 +1,5 @@
 package com.eredar.janus.core.dto;
 
-import com.eredar.janus.core.constants.CompareType;
 import com.eredar.janus.core.plugin.AbstractDataJanusPlugin;
 
 import java.lang.annotation.Annotation;
@@ -21,7 +20,7 @@ public interface JanusContext {
     /**
      * 获取比对类型
      */
-    CompareType getCompareType();
+    String getCompareType();
 
     /**
      * 获取方法入参
@@ -33,19 +32,19 @@ public interface JanusContext {
      *
      * @return true-比对；false-不比对
      */
-    Boolean isCompare();
+    Boolean needCompare();
 
     /**
      * 是否不比对
      *
      * @return true-不比对；false-比对
      */
-    Boolean isNotCompare();
+    Boolean doNotCompare();
 
     /**
      * 设置是否比对
      */
-    void setIsCompare(Boolean isCompare);
+    void setNeedCompare(Boolean needCompare);
 
     /**
      * 是否异步比对

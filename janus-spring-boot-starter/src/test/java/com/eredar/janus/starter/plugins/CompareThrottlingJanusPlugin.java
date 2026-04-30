@@ -15,7 +15,7 @@ public class CompareThrottlingJanusPlugin implements JanusPlugin {
     public void switchBranch(JanusContext context) {
         int value = longAdder.intValue();
         if (value >= 3) {
-            context.setIsCompare(false);
+            context.setNeedCompare(false);
         } else {
             longAdder.increment();
         }

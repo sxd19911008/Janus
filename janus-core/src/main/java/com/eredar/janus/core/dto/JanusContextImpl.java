@@ -1,23 +1,27 @@
 package com.eredar.janus.core.dto;
 
 import com.eredar.janus.core.compare.JanusCompare;
-import com.eredar.janus.core.constants.CompareType;
 import com.eredar.janus.core.exception.JanusException;
 import com.eredar.janus.core.lifecycle.Lifecycle;
 import com.eredar.janus.core.plugin.AbstractDataJanusPlugin;
 import com.eredar.janus.core.plugin.JanusPlugin;
+import com.eredar.janus.core.utils.JanusLogUtils;
 import com.eredar.janus.core.utils.JanusUtils;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Janus 对外暴露的上下文
  */
+@Slf4j
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,9 +31,16 @@ public class JanusContextImpl implements JanusContext {
     @Getter
     private ProceedingJoinPoint joinPoint;
 
+    // 切点方法
+    @Getter
+    private Method method;
+
     // 生命周期实现
     @Getter
     private Lifecycle lifecycle;
+
+    // 用于异步比对两个分支的运行结果的线程池
+    private ExecutorService janusCompareThreadPool;
 
     // 优先级小于0的插件
     @Getter
@@ -53,11 +64,11 @@ public class JanusContextImpl implements JanusContext {
 
     // 比对类型
     @Getter
-    private CompareType compareType;
+    private String compareType;
 
     // 是否比对，允许通过插件在运行时判断是否要比对
     @Setter
-    private Boolean isCompare;
+    private Boolean needCompare;
 
     // 比对分支运行完后，比对2个分支的结果的过程是否异步执行。默认是异步执行
     private Boolean isAsyncCompare;
@@ -117,13 +128,13 @@ public class JanusContextImpl implements JanusContext {
     }
 
     @Override
-    public Boolean isCompare() {
-        return this.isCompare;
+    public Boolean needCompare() {
+        return this.needCompare;
     }
 
     @Override
-    public Boolean isNotCompare() {
-        return !this.isCompare;
+    public Boolean doNotCompare() {
+        return !this.needCompare;
     }
 
     @Override
@@ -171,7 +182,38 @@ public class JanusContextImpl implements JanusContext {
      * 执行比对分支
      */
     public void compareBranchExecute() {
-        this.executeBranch(this.compareBranch);
+        try {
+            this.executeBranch(this.compareBranch);
+        } catch (Throwable e) {
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:compareBranchExecute] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    this.methodId,
+                    this.businessKey,
+                    e
+            );
+        }
+    }
+
+    /**
+     * 比对两个分支的结果。
+     */
+    public void compare() {
+        try {
+            if (this.isAsyncCompare) {
+                janusCompareThreadPool.execute(() -> this.lifecycle.compare(this));
+            } else {
+                this.lifecycle.compare(this);
+            }
+        } catch (Throwable e) {
+            log.error(
+                    "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:compare] >> exception=",
+                    JanusLogUtils.FAIL_ICON,
+                    this.methodId,
+                    this.businessKey,
+                    e
+            );
+        }
     }
 
     /**

@@ -3,7 +3,6 @@ package com.eredar.janus.core.lifecycle;
 import com.eredar.janus.core.annotation.Secondary;
 import com.eredar.janus.core.compare.JanusCompare;
 import com.eredar.janus.core.config.JanusConfigProperties;
-import com.eredar.janus.core.constants.CompareType;
 import com.eredar.janus.core.constants.JanusConstants;
 import com.eredar.janus.core.dto.*;
 import com.eredar.janus.core.exception.JanusException;
@@ -214,21 +213,6 @@ public class CoreLifecycle implements Lifecycle {
         }
         contextImpl.setMasterBranch(masterBranch);
         contextImpl.setCompareBranch(compareBranch);
-
-        /* master 分支 */
-        // 如果需要回滚，则设置相关标识
-        if (CompareType.isMasterBranchRollback(context.getCompareType())) {
-            masterBranch.setIsRollback(true);
-        }
-        /* compare 分支 */
-        // 如果需要回滚，则设置相关标识
-        if (CompareType.isCompareBranchRollback(context.getCompareType())) {
-            compareBranch.setIsRollback(true);
-        }
-        // 如果是异步执行，需要设置相关标识
-        if (context.getCompareType() == CompareType.ASYNC_COMPARE) {
-            compareBranch.setIsAsync(true);
-        }
     }
 
     /**

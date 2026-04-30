@@ -723,9 +723,9 @@ JanusContextImpl janusContextImpl = (JanusContextImpl) context;
 | `getBusinessKey()` | `String` | 获取业务主键 |
 | `getCompareType()` | `CompareType` | 获取比对类型 |
 | `getArgs()` | `Object[]` | 获取方法入参 |
-| `isCompare()` | `Boolean` | 是否比对 |
-| `isNotCompare()` | `Boolean` | 是否不比对 |
-| `setIsCompare(Boolean isCompare)` | `void` | 设置是否比对 |
+| `needCompare()` | `Boolean` | 是否比对 |
+| `doNotCompare()` | `Boolean` | 是否不比对 |
+| `setNeedCompare(Boolean needCompare)` | `void` | 设置是否比对 |
 | `isAsyncCompare()` | `Boolean` | 是否异步比对 |
 | `getMasterBranchName()` | `String` | 获取主分支名称 |
 | `getPrimaryBranch()` | `BranchInfo` | 获取primary分支 |

@@ -1,6 +1,6 @@
 package com.eredar.janus.core.config;
 
-import com.eredar.janus.core.constants.CompareType;
+import com.eredar.janus.core.constants.JanusCompareType;
 import com.eredar.janus.core.constants.JanusConstants;
 import lombok.Data;
 
@@ -27,10 +27,10 @@ public class JanusConfigProperties {
     private String defaultMasterBranch = JanusConstants.SECONDARY;
 
     /*
-     * 默认比对类型，见 CompareType
+     * 默认比对类型，见 JanusCompareType
      * 默认值为 ASYNC_COMPARE 异步比对
      */
-    private String defaultCompareType = CompareType.ASYNC_COMPARE.name();
+    private String defaultCompareType = JanusCompareType.ASYNC_COMPARE;
 
     // 异步执行比对分支的线程池配置
     private ThreadPoolProperty janusBranchThreadPool;

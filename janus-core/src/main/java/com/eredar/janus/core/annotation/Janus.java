@@ -2,7 +2,7 @@ package com.eredar.janus.core.annotation;
 
 import com.eredar.janus.core.compare.JanusCompareDefaultImpl;
 import com.eredar.janus.core.compare.JanusCompare;
-import com.eredar.janus.core.constants.CompareType;
+import com.eredar.janus.core.constants.JanusCompareType;
 import com.eredar.janus.core.plugin.JanusPlugin;
 
 import java.lang.annotation.*;
@@ -17,7 +17,7 @@ public @interface Janus {
     String methodId();
 
     // 比对类型
-    CompareType compareType() default CompareType.NONE;
+    String compareType() default JanusCompareType.NONE;
 
     // 业务数据键
     String businessKey() default "";
