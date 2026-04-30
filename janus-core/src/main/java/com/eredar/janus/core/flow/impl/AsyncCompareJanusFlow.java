@@ -46,8 +46,11 @@ public class AsyncCompareJanusFlow implements JanusFlow {
 
     @Override
     public void execute(JanusContextImpl context) {
-        // 计数器加 1，统计该方法当前待处理的异步比对任务数
-        this.increment(context);
+        // 是否需要比对
+        if (context.needCompare()) {
+            // 需要比对，计数器加 1，统计该方法当前待处理的异步比对任务数
+            this.increment(context);
+        }
         try {
             // 异步执行比对分支，需要设置相关标识
             context.getCompareBranch().setIsAsync(true);
@@ -57,8 +60,7 @@ public class AsyncCompareJanusFlow implements JanusFlow {
 
             // 插件可能在主分支执行期间动态关闭比对，需再次检查
             if (context.doNotCompare()) {
-                // 无需异步任务，计数器归还
-                this.decrement(context);
+                // 无需异步任务，直接返回，不需要操作计数器，因为这种场景下计数器并没有加1
                 return;
             }
 
@@ -102,10 +104,8 @@ public class AsyncCompareJanusFlow implements JanusFlow {
             if (janusConfigProperties.getAsyncCompareThrottling().isClosed()) {
                 return;
             }
-            if (context.needCompare()) {
-                AtomicInteger counter = methodCountMap.computeIfAbsent(context.getMethod(), k -> new AtomicInteger(0));
-                counter.incrementAndGet();
-            }
+            AtomicInteger counter = methodCountMap.computeIfAbsent(context.getMethod(), k -> new AtomicInteger(0));
+            counter.incrementAndGet();
         } catch (Throwable e) {
             log.error(
                     "[Janus] {} [methodId:{}] [businessKey:{}] [lifecycle:throttle#increment] >> exception=",

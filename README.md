@@ -215,7 +215,7 @@ janus:
 - **SYNC_COMPARE**: 同步执行2个分支，然后比对
 - **ASYNC_COMPARE:** 异步执行比对分支，然后比对
 - **SYNC_ROLLBACK_ONE_COMPARE**: 同步执行2个分支，回滚比对分支的事务，然后比对
-- **SYNC_ROLLBACK_ALL_COMPARE**: 同步执行2个分支，回滚2个分支的事务，然后比对
+- **SYNC_ROLLBACK_ALL_COMPARE**: 同步执行2个分支，回滚2个分支的事务，然后比对。注意，该模式虽然不会修改数据库数据，但是遇到异常时依然会抛出异常。
 
 ### 比对模式选择
 
