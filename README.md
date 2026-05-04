@@ -246,6 +246,43 @@ janus:
   default-compare-type: SYNC_COMPARE
 ```
 
+### 自定义比对模式
+
+如果需要自定义比对模式，可以实现`JanusFlow`接口，通过实现`getCompareType()`方法定义新的compareType。
+
+注意，新的compareType不能重复，否则报错。
+
+同时必须实现`JanusFlow`接口的`execute`方法，定义新的compareType所对应的比对流程。
+
+示例如下：
+
+```java
+public class SyncCompareJanusFlow implements JanusFlow {
+
+    @Override
+    public String getCompareType() {
+        return JanusCompareType.SYNC_COMPARE;
+    }
+
+    @Override
+    public void execute(JanusContextImpl context) {
+        // 执行主分支
+        context.masterBranchExecute();
+
+        // 插件可能在主分支执行期间动态关闭比对，需再次检查
+        if (context.doNotCompare()) {
+            return;
+        }
+
+        // 同步执行比对分支
+        context.compareBranchExecute();
+
+        // 比对两个分支的结果
+        context.compare();
+    }
+}
+```
+
 ### <font color=#FF0000 >重要</font>：MyBatis一级缓存清理
 
 比对事务方法的场景，需要实现对持久层框架的缓存清理，防止因为事务回滚导致的缓存与数据库数据不一致。

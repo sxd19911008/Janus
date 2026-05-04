@@ -1,13 +1,11 @@
 package com.eredar.janus.core.flow;
 
 import com.eredar.janus.core.dto.JanusContextImpl;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-@Slf4j
 public abstract class SyncRollbackAbstractJanusFlow implements JanusFlow {
 
     @Autowired

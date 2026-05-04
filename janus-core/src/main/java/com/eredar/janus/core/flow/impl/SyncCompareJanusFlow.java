@@ -3,7 +3,6 @@ package com.eredar.janus.core.flow.impl;
 import com.eredar.janus.core.constants.JanusCompareType;
 import com.eredar.janus.core.dto.JanusContextImpl;
 import com.eredar.janus.core.flow.JanusFlow;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * {@link JanusCompareType#SYNC_COMPARE} 流程实现
@@ -11,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
  * 两个分支均在调用方线程中串行执行，主分支返回值对用户无感知延迟，
  * 但整体耗时为两个分支之和。</p>
  */
-@Slf4j
 public class SyncCompareJanusFlow implements JanusFlow {
 
     @Override
