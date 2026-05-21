@@ -2,6 +2,7 @@ package io.github.kentasun.janus.core.config;
 
 import io.github.kentasun.janus.core.constants.JanusCompareType;
 import io.github.kentasun.janus.core.constants.JanusConstants;
+import io.github.kentasun.janus.core.exception.JanusException;
 
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -131,6 +132,7 @@ public class JanusConfigProperties {
                     case "DAYS":
                         return TimeUnit.DAYS;
                 }
+                throw new JanusException(String.format("TimeUnit[%s] not found", this.unit));
             }
             return null;
         }
@@ -147,6 +149,7 @@ public class JanusConfigProperties {
                     case "DiscardOldestPolicy":
                         return new ThreadPoolExecutor.DiscardOldestPolicy();
                 }
+                throw new JanusException(String.format("RejectedExecutionHandler[%s] not found", this.rejectedHandler));
             }
             return null;
         }
